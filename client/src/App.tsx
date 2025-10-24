@@ -1,7 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -9,32 +9,27 @@ import Receitas from "./pages/Receitas";
 import Despesas from "./pages/Despesas";
 import Relatorios from "./pages/Relatorios";
 
-function Router() {
-  return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/receitas"} component={Receitas} />
-      <Route path={"/despesas"} component={Despesas} />
-      <Route path={"/estoque"} component={() => <div>Estoque (em desenvolvimento)</div>} />
-      <Route path={"/produtos"} component={() => <div>Produtos (em desenvolvimento)</div>} />
-      <Route path={"/fornecedores"} component={() => <div>Fornecedores (em desenvolvimento)</div>} />
-      <Route path={"/unidades"} component={() => <div>Unidades (em desenvolvimento)</div>} />
-      <Route path={"/relatorios"} component={Relatorios} />
-      <Route path={"/404"} component={NotFound} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="light">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
+      <BrowserRouter>
+        <ThemeProvider defaultTheme="light">
+          <TooltipProvider>
+            <Toaster />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/receitas" element={<Receitas />} />
+              <Route path="/despesas" element={<Despesas />} />
+              <Route path="/estoque" element={<div>Estoque (em desenvolvimento)</div>} />
+              <Route path="/produtos" element={<div>Produtos (em desenvolvimento)</div>} />
+              <Route path="/fornecedores" element={<div>Fornecedores (em desenvolvimento)</div>} />
+              <Route path="/unidades" element={<div>Unidades (em desenvolvimento)</div>} />
+              <Route path="/relatorios" element={<Relatorios />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </TooltipProvider>
+        </ThemeProvider>
+      </BrowserRouter>
     </ErrorBoundary>
   );
 }
