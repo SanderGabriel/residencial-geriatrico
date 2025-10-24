@@ -222,7 +222,7 @@ function DashboardLayoutContent({
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
                       isActive={isActive}
-                      onClick={() => navigate(item.path)}
+                      onClick={() => window.location.href = item.path}
                       tooltip={item.label}
                       className={`h-10 transition-all font-normal`}
                     >
