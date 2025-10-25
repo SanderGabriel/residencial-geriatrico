@@ -28,7 +28,9 @@ import {
   categoriasProduto,
   estoque,
   movimentacoesEstoque,
-  precosFornecedor
+  precosFornecedor,
+  contasPagar,
+  contasReceber
 } from "../drizzle/schema";
 import { eq, and, sql, desc } from "drizzle-orm";
 
@@ -450,6 +452,313 @@ export const appRouter = router({
           margemOperacional: totalReceitas > 0 ? (lucroOperacional / totalReceitas) * 100 : 0,
           margemLiquida: totalReceitas > 0 ? (lucroLiquido / totalReceitas) * 100 : 0,
         };
+      }),
+  }),
+
+  // === CONTAS A PAGAR ===
+  contasPagar: router({
+    list: protectedProcedure
+      .input(z.object({
+        unidadeId: z.number().nullable().optional(),
+        startDate: z.string(),
+        endDate: z.string(),
+        pendentes: z.boolean().optional(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        let query = db.select().from(contasPagar).$dynamic();
+
+        const conditions = [];
+        if (input.unidadeId) {
+          conditions.push(eq(contasPagar.unidadeId, input.unidadeId));
+        }
+        if (input.pendentes) {
+          conditions.push(sql`${contasPagar.dataPagamento} IS NULL`);
+        }
+        conditions.push(sql`${contasPagar.dataVencimento} >= ${input.startDate}`);
+        conditions.push(sql`${contasPagar.dataVencimento} <= ${input.endDate}`);
+
+        if (conditions.length > 0) {
+          query = query.where(and(...conditions));
+        }
+
+        const result = await query.orderBy(desc(contasPagar.dataVencimento));
+        return result;
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        unidadeId: z.number(),
+        categoriaDespesaId: z.number(),
+        fornecedorId: z.number().nullable().optional(),
+        descricao: z.string(),
+        valorTotal: z.number(),
+        dataVencimento: z.string(),
+        observacoes: z.string().nullable().optional(),
+        parcelado: z.boolean().optional(),
+        numeroParcelas: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        if (input.parcelado && input.numeroParcelas && input.numeroParcelas > 1) {
+          // Criar conta pai
+          const [contaPai] = await db.insert(contasPagar).values({
+            unidadeId: input.unidadeId,
+            categoriaDespesaId: input.categoriaDespesaId,
+            fornecedorId: input.fornecedorId || null,
+            descricao: `${input.descricao} (Parcelado ${input.numeroParcelas}x)`,
+            valorTotal: input.valorTotal,
+            dataVencimento: new Date(input.dataVencimento),
+            observacoes: input.observacoes || null,
+            parcelaNumero: null,
+            parcelaTotal: input.numeroParcelas,
+            contaPaiId: null,
+            usuarioId: ctx.user!.id,
+          });
+
+          const contaPaiId = contaPai.insertId;
+          const valorParcela = Math.floor(input.valorTotal / input.numeroParcelas);
+          const dataBase = new Date(input.dataVencimento);
+
+          // Criar parcelas
+          for (let i = 1; i <= input.numeroParcelas; i++) {
+            const dataVencimentoParcela = new Date(dataBase);
+            dataVencimentoParcela.setMonth(dataVencimentoParcela.getMonth() + (i - 1));
+
+            await db.insert(contasPagar).values({
+              unidadeId: input.unidadeId,
+              categoriaDespesaId: input.categoriaDespesaId,
+              fornecedorId: input.fornecedorId || null,
+              descricao: `${input.descricao} (${i}/${input.numeroParcelas})`,
+              valorTotal: i === input.numeroParcelas ? input.valorTotal - (valorParcela * (input.numeroParcelas - 1)) : valorParcela,
+              dataVencimento: dataVencimentoParcela,
+              observacoes: input.observacoes || null,
+              parcelaNumero: i,
+              parcelaTotal: input.numeroParcelas,
+              contaPaiId: Number(contaPaiId),
+              usuarioId: ctx.user!.id,
+            });
+          }
+
+          return { success: true, parcelado: true };
+        } else {
+          await db.insert(contasPagar).values({
+            unidadeId: input.unidadeId,
+            categoriaDespesaId: input.categoriaDespesaId,
+            fornecedorId: input.fornecedorId || null,
+            descricao: input.descricao,
+            valorTotal: input.valorTotal,
+            dataVencimento: new Date(input.dataVencimento),
+            observacoes: input.observacoes || null,
+            parcelaNumero: null,
+            parcelaTotal: null,
+            contaPaiId: null,
+            usuarioId: ctx.user!.id,
+          });
+
+          return { success: true, parcelado: false };
+        }
+      }),
+
+    marcarPago: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        dataPagamento: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        // Buscar a conta
+        const [conta] = await db.select().from(contasPagar).where(eq(contasPagar.id, input.id));
+        if (!conta) throw new Error("Conta não encontrada");
+
+        // Criar despesa
+        const [despesa] = await db.insert(despesas).values({
+          unidadeId: conta.unidadeId,
+          categoriaId: conta.categoriaDespesaId,
+          fornecedorId: conta.fornecedorId,
+          descricao: conta.descricao,
+          valor: conta.valorTotal,
+          dataDespesa: new Date(input.dataPagamento),
+          observacoes: conta.observacoes,
+          usuarioId: ctx.user!.id,
+        });
+
+        // Atualizar conta
+        await db.update(contasPagar)
+          .set({
+            dataPagamento: new Date(input.dataPagamento),
+            despesaId: Number(despesa.insertId),
+          })
+          .where(eq(contasPagar.id, input.id));
+
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        await db.delete(contasPagar).where(eq(contasPagar.id, input.id));
+        return { success: true };
+      }),
+  }),
+
+  // === CONTAS A RECEBER ===
+  contasReceber: router({
+    list: protectedProcedure
+      .input(z.object({
+        unidadeId: z.number().nullable().optional(),
+        startDate: z.string(),
+        endDate: z.string(),
+        pendentes: z.boolean().optional(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        let query = db.select().from(contasReceber).$dynamic();
+
+        const conditions = [];
+        if (input.unidadeId) {
+          conditions.push(eq(contasReceber.unidadeId, input.unidadeId));
+        }
+        if (input.pendentes) {
+          conditions.push(sql`${contasReceber.dataRecebimento} IS NULL`);
+        }
+        conditions.push(sql`${contasReceber.dataVencimento} >= ${input.startDate}`);
+        conditions.push(sql`${contasReceber.dataVencimento} <= ${input.endDate}`);
+
+        if (conditions.length > 0) {
+          query = query.where(and(...conditions));
+        }
+
+        const result = await query.orderBy(desc(contasReceber.dataVencimento));
+        return result;
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        unidadeId: z.number(),
+        categoriaReceitaId: z.number(),
+        descricao: z.string(),
+        valorTotal: z.number(),
+        dataVencimento: z.string(),
+        observacoes: z.string().nullable().optional(),
+        parcelado: z.boolean().optional(),
+        numeroParcelas: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        if (input.parcelado && input.numeroParcelas && input.numeroParcelas > 1) {
+          // Criar conta pai
+          const [contaPai] = await db.insert(contasReceber).values({
+            unidadeId: input.unidadeId,
+            categoriaReceitaId: input.categoriaReceitaId,
+            descricao: `${input.descricao} (Parcelado ${input.numeroParcelas}x)`,
+            valorTotal: input.valorTotal,
+            dataVencimento: new Date(input.dataVencimento),
+            observacoes: input.observacoes || null,
+            parcelaNumero: null,
+            parcelaTotal: input.numeroParcelas,
+            contaPaiId: null,
+            usuarioId: ctx.user!.id,
+          });
+
+          const contaPaiId = contaPai.insertId;
+          const valorParcela = Math.floor(input.valorTotal / input.numeroParcelas);
+          const dataBase = new Date(input.dataVencimento);
+
+          // Criar parcelas
+          for (let i = 1; i <= input.numeroParcelas; i++) {
+            const dataVencimentoParcela = new Date(dataBase);
+            dataVencimentoParcela.setMonth(dataVencimentoParcela.getMonth() + (i - 1));
+
+            await db.insert(contasReceber).values({
+              unidadeId: input.unidadeId,
+              categoriaReceitaId: input.categoriaReceitaId,
+              descricao: `${input.descricao} (${i}/${input.numeroParcelas})`,
+              valorTotal: i === input.numeroParcelas ? input.valorTotal - (valorParcela * (input.numeroParcelas - 1)) : valorParcela,
+              dataVencimento: dataVencimentoParcela,
+              observacoes: input.observacoes || null,
+              parcelaNumero: i,
+              parcelaTotal: input.numeroParcelas,
+              contaPaiId: Number(contaPaiId),
+              usuarioId: ctx.user!.id,
+            });
+          }
+
+          return { success: true, parcelado: true };
+        } else {
+          await db.insert(contasReceber).values({
+            unidadeId: input.unidadeId,
+            categoriaReceitaId: input.categoriaReceitaId,
+            descricao: input.descricao,
+            valorTotal: input.valorTotal,
+            dataVencimento: new Date(input.dataVencimento),
+            observacoes: input.observacoes || null,
+            parcelaNumero: null,
+            parcelaTotal: null,
+            contaPaiId: null,
+            usuarioId: ctx.user!.id,
+          });
+
+          return { success: true, parcelado: false };
+        }
+      }),
+
+    marcarRecebido: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        dataRecebimento: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        // Buscar a conta
+        const [conta] = await db.select().from(contasReceber).where(eq(contasReceber.id, input.id));
+        if (!conta) throw new Error("Conta não encontrada");
+
+        // Criar receita
+        const [receita] = await db.insert(receitas).values({
+          unidadeId: conta.unidadeId,
+          categoriaId: conta.categoriaReceitaId,
+          descricao: conta.descricao,
+          valor: conta.valorTotal,
+          dataReceita: new Date(input.dataRecebimento),
+          observacoes: conta.observacoes,
+          usuarioId: ctx.user!.id,
+        });
+
+        // Atualizar conta
+        await db.update(contasReceber)
+          .set({
+            dataRecebimento: new Date(input.dataRecebimento),
+            receitaId: Number(receita.insertId),
+          })
+          .where(eq(contasReceber.id, input.id));
+
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        await db.delete(contasReceber).where(eq(contasReceber.id, input.id));
+        return { success: true };
       }),
   }),
 });

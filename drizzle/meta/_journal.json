@@ -15,6 +15,20 @@
       "when": 1761265501016,
       "tag": "0001_icy_senator_kelly",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1761433950232,
+      "tag": "0002_bent_peter_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1761434081537,
+      "tag": "0003_yummy_giant_man",
+      "breakpoints": true
     }
   ]
 }

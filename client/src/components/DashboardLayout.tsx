@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, TrendingUp, TrendingDown, Package, Building2, FileText } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, TrendingUp, TrendingDown, Package, Building2, FileText, CreditCard, DollarSign } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -31,6 +31,8 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/" },
   { icon: TrendingUp, label: "Receitas", path: "/receitas" },
   { icon: TrendingDown, label: "Despesas", path: "/despesas" },
+  { icon: CreditCard, label: "Contas a Pagar", path: "/contas-pagar" },
+  { icon: DollarSign, label: "Contas a Receber", path: "/contas-receber" },
   { icon: Package, label: "Estoque", path: "/estoque" },
   { icon: Package, label: "Produtos", path: "/produtos" },
   { icon: Users, label: "Fornecedores", path: "/fornecedores" },

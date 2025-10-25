@@ -78,6 +78,7 @@ export const receitas = mysqlTable("receitas", {
   valor: int("valor").notNull(), // Valor em centavos
   dataReceita: date("dataReceita").notNull(),
   dataVencimento: date("dataVencimento"),
+  observacoes: text("observacoes"),
   status: mysqlEnum("status", ["pendente", "recebida", "cancelada"]).default("recebida").notNull(),
   usuarioId: int("usuarioId").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -94,10 +95,12 @@ export const despesas = mysqlTable("despesas", {
   id: int("id").autoincrement().primaryKey(),
   unidadeId: int("unidadeId").notNull(),
   categoriaId: int("categoriaId").notNull(),
+  fornecedorId: int("fornecedorId"),
   descricao: varchar("descricao", { length: 255 }),
   valor: int("valor").notNull(), // Valor em centavos
   dataDespesa: date("dataDespesa").notNull(),
   dataVencimento: date("dataVencimento"),
+  observacoes: text("observacoes"),
   status: mysqlEnum("status", ["pendente", "paga", "cancelada"]).default("paga").notNull(),
   usuarioId: int("usuarioId").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -246,4 +249,55 @@ export const auditoria = mysqlTable("auditoria", {
 
 export type Auditoria = typeof auditoria.$inferSelect;
 export type InsertAuditoria = typeof auditoria.$inferInsert;
+
+
+
+/**
+ * Contas a Pagar
+ */
+export const contasPagar = mysqlTable("contas_pagar", {
+  id: int("id").autoincrement().primaryKey(),
+  unidadeId: int("unidadeId").notNull(),
+  categoriaDespesaId: int("categoriaDespesaId").notNull(),
+  fornecedorId: int("fornecedorId"),
+  descricao: varchar("descricao", { length: 255 }).notNull(),
+  valorTotal: int("valorTotal").notNull(), // Valor em centavos
+  dataVencimento: date("dataVencimento").notNull(),
+  dataPagamento: date("dataPagamento"),
+  despesaId: int("despesaId"), // ID da despesa gerada quando pago
+  observacoes: text("observacoes"),
+  parcelaNumero: int("parcelaNumero"), // Número da parcela (1, 2, 3...)
+  parcelaTotal: int("parcelaTotal"), // Total de parcelas
+  contaPaiId: int("contaPaiId"), // ID da conta pai (para parcelas)
+  usuarioId: int("usuarioId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ContaPagar = typeof contasPagar.$inferSelect;
+export type InsertContaPagar = typeof contasPagar.$inferInsert;
+
+/**
+ * Contas a Receber
+ */
+export const contasReceber = mysqlTable("contas_receber", {
+  id: int("id").autoincrement().primaryKey(),
+  unidadeId: int("unidadeId").notNull(),
+  categoriaReceitaId: int("categoriaReceitaId").notNull(),
+  descricao: varchar("descricao", { length: 255 }).notNull(),
+  valorTotal: int("valorTotal").notNull(), // Valor em centavos
+  dataVencimento: date("dataVencimento").notNull(),
+  dataRecebimento: date("dataRecebimento"),
+  receitaId: int("receitaId"), // ID da receita gerada quando recebido
+  observacoes: text("observacoes"),
+  parcelaNumero: int("parcelaNumero"), // Número da parcela (1, 2, 3...)
+  parcelaTotal: int("parcelaTotal"), // Total de parcelas
+  contaPaiId: int("contaPaiId"), // ID da conta pai (para parcelas)
+  usuarioId: int("usuarioId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ContaReceber = typeof contasReceber.$inferSelect;
+export type InsertContaReceber = typeof contasReceber.$inferInsert;
 

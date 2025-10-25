@@ -8,6 +8,8 @@ import Home from "./pages/Home";
 import Receitas from "./pages/Receitas";
 import Despesas from "./pages/Despesas";
 import Relatorios from "./pages/Relatorios";
+import ContasPagar from "./pages/ContasPagar";
+import ContasReceber from "./pages/ContasReceber";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
               <Route path="/fornecedores" element={<div>Fornecedores (em desenvolvimento)</div>} />
               <Route path="/unidades" element={<div>Unidades (em desenvolvimento)</div>} />
               <Route path="/relatorios" element={<Relatorios />} />
+              <Route path="/contas-pagar" element={<ContasPagar />} />
+              <Route path="/contas-receber" element={<ContasReceber />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </TooltipProvider>
