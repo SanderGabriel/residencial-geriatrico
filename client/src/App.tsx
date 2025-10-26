@@ -11,7 +11,8 @@ import Relatorios from "./pages/Relatorios";
 import ContasPagar from "./pages/ContasPagar";
 import ContasReceber from "./pages/ContasReceber";
 import Fornecedores from "./pages/Fornecedores";
-import Produtos from "./pages/Produtos";
+import Produtos from "@/pages/Produtos";
+import Estoque from "@/pages/Estoque";
 
 function App() {
   return (
@@ -24,8 +25,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/receitas" element={<Receitas />} />
               <Route path="/despesas" element={<Despesas />} />
-              <Route path="/estoque" element={<div>Estoque (em desenvolvimento)</div>} />
               <Route path="/produtos" element={<Produtos />} />
+              <Route path="/estoque" element={<Estoque />} />
               <Route path="/fornecedores" element={<Fornecedores />} />
               <Route path="/unidades" element={<div>Unidades (em desenvolvimento)</div>} />
               <Route path="/relatorios" element={<Relatorios />} />

@@ -40,3 +40,13 @@
 - [x] Página de Fornecedores (listar, cadastrar, editar, excluir)
 - [x] Página de Produtos (cadastrar produtos com embalagens variadas)
 
+
+
+## 🔧 Melhorias Solicitadas
+- [x] Adicionar campo "Tipo de Embalagem" no cadastro de produtos (texto livre)
+
+
+
+## 🚧 Em Desenvolvimento Agora
+- [x] Página de Estoque (visualização, entrada, saída, histórico)
+

@@ -13,6 +13,7 @@ export default function Produtos() {
     categoriaId: "",
     nome: "",
     descricao: "",
+    tipoEmbalagem: "",
     unidadeMedida: "",
     tamanho: "",
   });
@@ -68,6 +69,7 @@ export default function Produtos() {
       categoriaId: "",
       nome: "",
       descricao: "",
+      tipoEmbalagem: "",
       unidadeMedida: "",
       tamanho: "",
     });
@@ -80,6 +82,7 @@ export default function Produtos() {
       categoriaId: parseInt(formData.categoriaId),
       nome: formData.nome,
       descricao: formData.descricao || undefined,
+      tipoEmbalagem: formData.tipoEmbalagem || undefined,
     });
   };
 
@@ -144,6 +147,19 @@ export default function Produtos() {
                       value={formData.nome}
                       onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                       placeholder="Ex: Detergente, Arroz, Fralda..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Tipo de Embalagem
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.tipoEmbalagem}
+                      onChange={(e) => setFormData({ ...formData, tipoEmbalagem: e.target.value })}
+                      placeholder="Ex: Garrafa, Pacote, Caixa, Saco..."
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>

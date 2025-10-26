@@ -303,6 +303,7 @@ export const appRouter = router({
         nome: z.string(),
         categoriaId: z.number(),
         descricao: z.string().optional(),
+        tipoEmbalagem: z.string().optional(),
         sku: z.string().optional(),
       }))
       .mutation(async ({ input }) => {

@@ -151,6 +151,7 @@ export const produtos = mysqlTable("produtos", {
   nome: varchar("nome", { length: 255 }).notNull(),
   categoriaId: int("categoriaId").notNull(),
   descricao: text("descricao"),
+  tipoEmbalagem: varchar("tipoEmbalagem", { length: 100 }),
   sku: varchar("sku", { length: 100 }),
   ativo: boolean("ativo").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
