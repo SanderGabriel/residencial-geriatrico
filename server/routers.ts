@@ -107,6 +107,35 @@ export const appRouter = router({
         const result = await db.insert(fornecedores).values(input);
         return { success: true, id: result[0].insertId };
       }),
+
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        nome: z.string().optional(),
+        cnpj: z.string().optional(),
+        contato: z.string().optional(),
+        telefone: z.string().optional(),
+        email: z.string().optional(),
+        endereco: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const { id, ...data } = input;
+        await db.update(fornecedores).set(data).where(eq(fornecedores.id, id));
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.delete(fornecedores).where(eq(fornecedores.id, input.id));
+        return { success: true };
+      }),
   }),
 
   // === RECEITAS ===
@@ -282,6 +311,54 @@ export const appRouter = router({
         
         const result = await db.insert(produtos).values(input);
         return { success: true, id: result[0].insertId };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.delete(produtos).where(eq(produtos.id, input.id));
+        return { success: true };
+      }),
+
+    listEmbalagens: protectedProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      return await db.select().from(embalagensProduto);
+    }),
+
+    createEmbalagem: protectedProcedure
+      .input(z.object({
+        produtoId: z.number(),
+        unidadeMedida: z.string(),
+        tamanho: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const descricao = `${input.tamanho} ${input.unidadeMedida}`;
+        const quantidade = parseInt(input.tamanho) || 1;
+        
+        const result = await db.insert(embalagensProduto).values({
+          produtoId: input.produtoId,
+          descricao,
+          quantidade,
+          unidadeMedida: input.unidadeMedida,
+        });
+        return { success: true, id: result[0].insertId };
+      }),
+
+    deleteEmbalagem: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.delete(embalagensProduto).where(eq(embalagensProduto.id, input.id));
+        return { success: true };
       }),
   }),
 

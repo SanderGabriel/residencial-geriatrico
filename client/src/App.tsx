@@ -10,6 +10,8 @@ import Despesas from "./pages/Despesas";
 import Relatorios from "./pages/Relatorios";
 import ContasPagar from "./pages/ContasPagar";
 import ContasReceber from "./pages/ContasReceber";
+import Fornecedores from "./pages/Fornecedores";
+import Produtos from "./pages/Produtos";
 
 function App() {
   return (
@@ -23,8 +25,8 @@ function App() {
               <Route path="/receitas" element={<Receitas />} />
               <Route path="/despesas" element={<Despesas />} />
               <Route path="/estoque" element={<div>Estoque (em desenvolvimento)</div>} />
-              <Route path="/produtos" element={<div>Produtos (em desenvolvimento)</div>} />
-              <Route path="/fornecedores" element={<div>Fornecedores (em desenvolvimento)</div>} />
+              <Route path="/produtos" element={<Produtos />} />
+              <Route path="/fornecedores" element={<Fornecedores />} />
               <Route path="/unidades" element={<div>Unidades (em desenvolvimento)</div>} />
               <Route path="/relatorios" element={<Relatorios />} />
               <Route path="/contas-pagar" element={<ContasPagar />} />

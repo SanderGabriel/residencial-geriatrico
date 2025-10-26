@@ -28,3 +28,15 @@
 - [ ] Definição automática de estoque mínimo
 - [ ] Otimização de frequência de compras
 
+
+
+## 🐛 Bugs a Corrigir
+- [x] Validação de data ao marcar conta como paga/recebida (substituir prompt por dialog com campo de data)
+- [ ] Melhorar campo de data para usar calendário visual (igual aos outros campos)
+
+
+
+## 🚧 Em Desenvolvimento
+- [x] Página de Fornecedores (listar, cadastrar, editar, excluir)
+- [x] Página de Produtos (cadastrar produtos com embalagens variadas)
+

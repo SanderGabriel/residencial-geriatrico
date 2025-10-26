@@ -14,6 +14,9 @@ export default function ContasReceber() {
   const [selectedUnidade, setSelectedUnidade] = useState<string>("all");
   const [showForm, setShowForm] = useState(false);
   const [showPendentesOnly, setShowPendentesOnly] = useState(true);
+  const [showMarcarDialog, setShowMarcarDialog] = useState(false);
+  const [contaSelecionada, setContaSelecionada] = useState<number | null>(null);
+  const [dataRecebimento, setDataRecebimento] = useState(new Date().toISOString().split('T')[0]);
   
   const today = new Date();
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -102,9 +105,15 @@ export default function ContasReceber() {
   };
 
   const handleMarcarRecebido = (id: number) => {
-    const dataRecebimento = prompt("Digite a data do recebimento (AAAA-MM-DD):");
-    if (dataRecebimento) {
-      marcarRecebidoMutation.mutate({ id, dataRecebimento });
+    setContaSelecionada(id);
+    setShowMarcarDialog(true);
+  };
+
+  const confirmarRecebimento = () => {
+    if (contaSelecionada && dataRecebimento) {
+      marcarRecebidoMutation.mutate({ id: contaSelecionada, dataRecebimento });
+      setShowMarcarDialog(false);
+      setContaSelecionada(null);
     }
   };
 
@@ -412,6 +421,45 @@ export default function ContasReceber() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Dialog para marcar como recebido */}
+      {showMarcarDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Marcar como Recebido</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Data do Recebimento
+                </label>
+                <input
+                  type="date"
+                  value={dataRecebimento}
+                  onChange={(e) => setDataRecebimento(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowMarcarDialog(false);
+                    setContaSelecionada(null);
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={confirmarRecebimento}
+                  disabled={!dataRecebimento}
+                >
+                  Confirmar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   );
 }
