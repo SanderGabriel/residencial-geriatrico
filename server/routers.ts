@@ -68,6 +68,33 @@ export const appRouter = router({
         const result = await db.insert(unidades).values(input);
         return { success: true, id: result[0].insertId };
       }),
+    
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        nome: z.string(),
+        descricao: z.string().optional(),
+        endereco: z.string().optional(),
+        telefone: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        const { id, ...data } = input;
+        await db.update(unidades).set(data).where(eq(unidades.id, id));
+        return { success: true };
+      }),
+    
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.delete(unidades).where(eq(unidades.id, input.id));
+        return { success: true };
+      }),
   }),
 
   // === CATEGORIAS ===

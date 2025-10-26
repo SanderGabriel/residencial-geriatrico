@@ -12,12 +12,12 @@
 - [x] Contas a Pagar (cadastro, listagem, marcação de pagamento, geração automática de despesa)
 - [x] Contas a Receber (cadastro, listagem, marcação de recebimento, geração automática de receita)
 - [x] Sistema de parcelas para contas a pagar/receber
+- [x] Página de Fornecedores (CRUD completo com informações de contato)
+- [x] Página de Produtos (com múltiplas embalagens e tipo de embalagem)
+- [x] Página de Estoque (entrada, saída, visualização de estoque atual)
+- [x] Página de Unidades (CRUD completo para gestão de filiais)
 
 ## Funcionalidades Pendentes
-- [ ] Página de Estoque (controle de entrada/saída)
-- [ ] Página de Produtos (cadastro de produtos e embalagens)
-- [ ] Página de Fornecedores (gestão completa)
-- [ ] Página de Unidades (gestão das filiais)
 - [ ] Relatório de Curva ABC
 - [ ] Relatório de Consumo Médio
 - [ ] Análises Comparativas entre períodos
@@ -49,4 +49,9 @@
 
 ## 🚧 Em Desenvolvimento Agora
 - [x] Página de Estoque (visualização, entrada, saída, histórico)
+
+
+
+## ✅ Concluído Recentemente
+- [x] Página de Unidades (listar, criar, editar, excluir)
 

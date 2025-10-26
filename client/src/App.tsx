@@ -13,6 +13,7 @@ import ContasReceber from "./pages/ContasReceber";
 import Fornecedores from "./pages/Fornecedores";
 import Produtos from "@/pages/Produtos";
 import Estoque from "@/pages/Estoque";
+import Unidades from "@/pages/Unidades";
 
 function App() {
   return (
@@ -28,7 +29,7 @@ function App() {
               <Route path="/produtos" element={<Produtos />} />
               <Route path="/estoque" element={<Estoque />} />
               <Route path="/fornecedores" element={<Fornecedores />} />
-              <Route path="/unidades" element={<div>Unidades (em desenvolvimento)</div>} />
+              <Route path="/unidades" element={<Unidades />} />
               <Route path="/relatorios" element={<Relatorios />} />
               <Route path="/contas-pagar" element={<ContasPagar />} />
               <Route path="/contas-receber" element={<ContasReceber />} />
