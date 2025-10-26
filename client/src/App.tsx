@@ -16,6 +16,7 @@ import Estoque from "@/pages/Estoque";
 import Unidades from "@/pages/Unidades";
 import CurvaABC from "@/pages/CurvaABC";
 import ConsumoMedio from "@/pages/ConsumoMedio";
+import AnalisesComparativas from "@/pages/AnalisesComparativas";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
               <Route path="/relatorios" element={<Relatorios />} />
               <Route path="/curva-abc" element={<CurvaABC />} />
               <Route path="/consumo-medio" element={<ConsumoMedio />} />
+              <Route path="/analises-comparativas" element={<AnalisesComparativas />} />
               <Route path="/contas-pagar" element={<ContasPagar />} />
               <Route path="/contas-receber" element={<ContasReceber />} />
               <Route path="*" element={<NotFound />} />

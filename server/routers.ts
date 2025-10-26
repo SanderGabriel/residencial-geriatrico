@@ -842,6 +842,104 @@ export const appRouter = router({
           estatisticas,
         };
       }),
+    
+    // Análises Comparativas - Comparação entre períodos
+    comparativo: protectedProcedure
+      .input(z.object({
+        unidadeId: z.number().nullable().optional(),
+        periodo1Inicio: z.string(),
+        periodo1Fim: z.string(),
+        periodo2Inicio: z.string(),
+        periodo2Fim: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        // Função auxiliar para buscar dados de um período
+        const getDadosPeriodo = async (inicio: string, fim: string) => {
+          const conditions = [
+            sql`${receitas.dataReceita} >= ${inicio}`,
+            sql`${receitas.dataReceita} <= ${fim}`
+          ];
+          
+          if (input.unidadeId) {
+            conditions.push(eq(receitas.unidadeId, input.unidadeId));
+          }
+          
+          // Buscar receitas do período
+          const receitasPeriodo = await db
+            .select({
+              valor: receitas.valor,
+              dataReceita: receitas.dataReceita,
+            })
+            .from(receitas)
+            .where(and(...conditions));
+          
+          // Buscar despesas do período
+          const conditionsDespesas = [
+            sql`${despesas.dataDespesa} >= ${inicio}`,
+            sql`${despesas.dataDespesa} <= ${fim}`
+          ];
+          
+          if (input.unidadeId) {
+            conditionsDespesas.push(eq(despesas.unidadeId, input.unidadeId));
+          }
+          
+          const despesasPeriodo = await db
+            .select({
+              valor: despesas.valor,
+              dataDespesa: despesas.dataDespesa,
+            })
+            .from(despesas)
+            .where(and(...conditionsDespesas));
+          
+          const totalReceitas = receitasPeriodo.reduce((sum, r) => sum + r.valor, 0);
+          const totalDespesas = despesasPeriodo.reduce((sum, d) => sum + d.valor, 0);
+          const lucro = totalReceitas - totalDespesas;
+          const margem = totalReceitas > 0 ? (lucro / totalReceitas) * 100 : 0;
+          
+          return {
+            totalReceitas,
+            totalDespesas,
+            lucro,
+            margem,
+            quantidadeReceitas: receitasPeriodo.length,
+            quantidadeDespesas: despesasPeriodo.length,
+          };
+        };
+        
+        // Buscar dados dos dois períodos
+        const periodo1 = await getDadosPeriodo(input.periodo1Inicio, input.periodo1Fim);
+        const periodo2 = await getDadosPeriodo(input.periodo2Inicio, input.periodo2Fim);
+        
+        // Calcular variações
+        const calcularVariacao = (valorAtual: number, valorAnterior: number) => {
+          if (valorAnterior === 0) return valorAtual > 0 ? 100 : 0;
+          return ((valorAtual - valorAnterior) / valorAnterior) * 100;
+        };
+        
+        const variacoes = {
+          receitas: calcularVariacao(periodo2.totalReceitas, periodo1.totalReceitas),
+          despesas: calcularVariacao(periodo2.totalDespesas, periodo1.totalDespesas),
+          lucro: calcularVariacao(periodo2.lucro, periodo1.lucro),
+          margem: periodo2.margem - periodo1.margem, // Diferença absoluta para margem
+        };
+        
+        return {
+          periodo1: {
+            inicio: input.periodo1Inicio,
+            fim: input.periodo1Fim,
+            ...periodo1,
+          },
+          periodo2: {
+            inicio: input.periodo2Inicio,
+            fim: input.periodo2Fim,
+            ...periodo2,
+          },
+          variacoes,
+        };
+      }),
   }),
 
   // === CONTAS A PAGAR ===
