@@ -558,6 +558,153 @@ export const appRouter = router({
           margemLiquida: totalReceitas > 0 ? (lucroLiquido / totalReceitas) * 100 : 0,
         };
       }),
+    
+    // Curva ABC - Análise de produtos por valor de consumo
+    curvaAbc: protectedProcedure
+      .input(z.object({
+        unidadeId: z.number().nullable().optional(),
+        startDate: z.string(),
+        endDate: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        // Buscar todas as movimentações de saída no período
+        const conditions = [
+          eq(movimentacoesEstoque.tipo, "saida"),
+          sql`${movimentacoesEstoque.dataMovimentacao} >= ${input.startDate}`,
+          sql`${movimentacoesEstoque.dataMovimentacao} <= ${input.endDate}`
+        ];
+        
+        if (input.unidadeId) {
+          conditions.push(eq(movimentacoesEstoque.unidadeId, input.unidadeId));
+        }
+        
+        const movimentacoes = await db
+          .select({
+            embalagemId: movimentacoesEstoque.embalagemId,
+            quantidade: movimentacoesEstoque.quantidade,
+            precoUnitario: movimentacoesEstoque.precoUnitario,
+          })
+          .from(movimentacoesEstoque)
+          .where(and(...conditions));
+        
+        // Buscar últimos preços de entrada para cada embalagem
+        const ultimosPrecos: Record<number, number> = {};
+        
+        for (const mov of movimentacoes) {
+          if (!ultimosPrecos[mov.embalagemId]) {
+            // Buscar última entrada com preço para esta embalagem
+            const ultimaEntrada = await db
+              .select({ precoUnitario: movimentacoesEstoque.precoUnitario })
+              .from(movimentacoesEstoque)
+              .where(
+                and(
+                  eq(movimentacoesEstoque.embalagemId, mov.embalagemId),
+                  eq(movimentacoesEstoque.tipo, "entrada"),
+                  sql`${movimentacoesEstoque.precoUnitario} IS NOT NULL`
+                )
+              )
+              .orderBy(desc(movimentacoesEstoque.dataMovimentacao))
+              .limit(1);
+            
+            ultimosPrecos[mov.embalagemId] = ultimaEntrada[0]?.precoUnitario || 0;
+          }
+        }
+        
+        // Agrupar por embalagem e calcular valor total
+        const consumoPorEmbalagem: Record<number, { quantidade: number; valorTotal: number }> = {};
+        
+        for (const mov of movimentacoes) {
+          if (!consumoPorEmbalagem[mov.embalagemId]) {
+            consumoPorEmbalagem[mov.embalagemId] = { quantidade: 0, valorTotal: 0 };
+          }
+          consumoPorEmbalagem[mov.embalagemId].quantidade += mov.quantidade;
+          // Usar preço da movimentação ou último preço de entrada conhecido
+          const preco = mov.precoUnitario || ultimosPrecos[mov.embalagemId] || 0;
+          consumoPorEmbalagem[mov.embalagemId].valorTotal += mov.quantidade * preco;
+        }
+        
+        // Buscar informações de produtos e embalagens
+        const embalagens = await db.select().from(embalagensProduto);
+        const produtosData = await db.select().from(produtos);
+        const categorias = await db.select().from(categoriasProduto);
+        
+        // Montar lista de produtos com consumo
+        const produtosComConsumo = Object.entries(consumoPorEmbalagem).map(([embalagemId, dados]) => {
+          const embalagem = embalagens.find(e => e.id === parseInt(embalagemId));
+          const produto = produtosData.find((p: any) => p.id === embalagem?.produtoId);
+          const categoria = categorias.find(c => c.id === produto?.categoriaId);
+          
+          return {
+            embalagemId: parseInt(embalagemId),
+            produtoNome: produto?.nome || "Desconhecido",
+            categoriaNome: categoria?.nome || "Sem categoria",
+            embalagemDescricao: embalagem?.descricao || "",
+            quantidade: dados.quantidade,
+            valorTotal: dados.valorTotal,
+          };
+        });
+        
+        // Ordenar por valor total decrescente
+        produtosComConsumo.sort((a, b) => b.valorTotal - a.valorTotal);
+        
+        // Calcular valor total geral
+        const valorTotalGeral = produtosComConsumo.reduce((sum, p) => sum + p.valorTotal, 0);
+        
+        // Classificar em A, B, C
+        let acumulado = 0;
+        const produtosClassificados = produtosComConsumo.map(produto => {
+          acumulado += produto.valorTotal;
+          const percentualAcumulado = (acumulado / valorTotalGeral) * 100;
+          
+          let classe: "A" | "B" | "C";
+          if (percentualAcumulado <= 80) {
+            classe = "A";
+          } else if (percentualAcumulado <= 95) {
+            classe = "B";
+          } else {
+            classe = "C";
+          }
+          
+          return {
+            ...produto,
+            percentualValor: (produto.valorTotal / valorTotalGeral) * 100,
+            percentualAcumulado,
+            classe,
+          };
+        });
+        
+        // Calcular estatísticas por classe
+        const estatisticas = {
+          classeA: {
+            quantidade: produtosClassificados.filter(p => p.classe === "A").length,
+            valorTotal: produtosClassificados.filter(p => p.classe === "A").reduce((sum, p) => sum + p.valorTotal, 0),
+            percentual: 0,
+          },
+          classeB: {
+            quantidade: produtosClassificados.filter(p => p.classe === "B").length,
+            valorTotal: produtosClassificados.filter(p => p.classe === "B").reduce((sum, p) => sum + p.valorTotal, 0),
+            percentual: 0,
+          },
+          classeC: {
+            quantidade: produtosClassificados.filter(p => p.classe === "C").length,
+            valorTotal: produtosClassificados.filter(p => p.classe === "C").reduce((sum, p) => sum + p.valorTotal, 0),
+            percentual: 0,
+          },
+        };
+        
+        estatisticas.classeA.percentual = (estatisticas.classeA.valorTotal / valorTotalGeral) * 100;
+        estatisticas.classeB.percentual = (estatisticas.classeB.valorTotal / valorTotalGeral) * 100;
+        estatisticas.classeC.percentual = (estatisticas.classeC.valorTotal / valorTotalGeral) * 100;
+        
+        return {
+          produtos: produtosClassificados,
+          valorTotalGeral,
+          estatisticas,
+        };
+      }),
   }),
 
   // === CONTAS A PAGAR ===

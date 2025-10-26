@@ -1,0 +1,50 @@
+{
+  "query": "\nSELECT id, nome FROM produtos WHERE nome IN ('Feijão', 'Óleo de Soja', 'Açúcar', 'Café', 'Arroz');\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BgzxiTcMHsWEcg.root --database 5psVkZM6qoRp4JnBtU9FUt --execute \nSELECT id, nome FROM produtos WHERE nome IN ('Feijão', 'Óleo de Soja', 'Açúcar', 'Café', 'Arroz');\n",
+  "rows": [
+    {
+      "id": "1",
+      "nome": "Arroz"
+    },
+    {
+      "id": "2",
+      "nome": "Feijão"
+    },
+    {
+      "id": "30001",
+      "nome": "Feijão"
+    },
+    {
+      "id": "30002",
+      "nome": "Óleo de Soja"
+    },
+    {
+      "id": "30003",
+      "nome": "Açúcar"
+    },
+    {
+      "id": "30004",
+      "nome": "Café"
+    },
+    {
+      "id": "30005",
+      "nome": "Feijão"
+    },
+    {
+      "id": "30006",
+      "nome": "Óleo de Soja"
+    },
+    {
+      "id": "30007",
+      "nome": "Açúcar"
+    },
+    {
+      "id": "30008",
+      "nome": "Café"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n1\tArroz\n2\tFeijão\n30001\tFeijão\n30002\tÓleo de Soja\n30003\tAçúcar\n30004\tCafé\n30005\tFeijão\n30006\tÓleo de Soja\n30007\tAçúcar\n30008\tCafé\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

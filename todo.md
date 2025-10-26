@@ -16,9 +16,9 @@
 - [x] Página de Produtos (com múltiplas embalagens e tipo de embalagem)
 - [x] Página de Estoque (entrada, saída, visualização de estoque atual)
 - [x] Página de Unidades (CRUD completo para gestão de filiais)
+- [x] Relatório de Curva ABC (classificação de produtos por valor de consumo)
 
 ## Funcionalidades Pendentes
-- [ ] Relatório de Curva ABC
 - [ ] Relatório de Consumo Médio
 - [ ] Análises Comparativas entre períodos
 
@@ -54,4 +54,9 @@
 
 ## ✅ Concluído Recentemente
 - [x] Página de Unidades (listar, criar, editar, excluir)
+
+
+
+
+
 

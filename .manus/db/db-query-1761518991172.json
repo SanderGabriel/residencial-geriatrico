@@ -1,0 +1,38 @@
+{
+  "query": "\n-- Limpar produtos duplicados (manter apenas o primeiro de cada)\nDELETE FROM produtos WHERE id IN (\n  SELECT id FROM (\n    SELECT id, ROW_NUMBER() OVER (PARTITION BY nome ORDER BY id) as rn\n    FROM produtos\n  ) t WHERE rn > 1\n);\n\n-- Verificar produtos restantes\nSELECT id, nome FROM produtos ORDER BY id;\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BgzxiTcMHsWEcg.root --database 5psVkZM6qoRp4JnBtU9FUt --execute \n-- Limpar produtos duplicados (manter apenas o primeiro de cada)\nDELETE FROM produtos WHERE id IN (\n  SELECT id FROM (\n    SELECT id, ROW_NUMBER() OVER (PARTITION BY nome ORDER BY id) as rn\n    FROM produtos\n  ) t WHERE rn > 1\n);\n\n-- Verificar produtos restantes\nSELECT id, nome FROM produtos ORDER BY id;\n",
+  "rows": [
+    {
+      "id": "1",
+      "nome": "Arroz"
+    },
+    {
+      "id": "2",
+      "nome": "Feijão"
+    },
+    {
+      "id": "3",
+      "nome": "Água Sanitária"
+    },
+    {
+      "id": "4",
+      "nome": "Desinfetante"
+    },
+    {
+      "id": "30002",
+      "nome": "Óleo de Soja"
+    },
+    {
+      "id": "30003",
+      "nome": "Açúcar"
+    },
+    {
+      "id": "30004",
+      "nome": "Café"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tnome\n1\tArroz\n2\tFeijão\n3\tÁgua Sanitária\n4\tDesinfetante\n30002\tÓleo de Soja\n30003\tAçúcar\n30004\tCafé\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}
