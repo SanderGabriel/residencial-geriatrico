@@ -19,6 +19,8 @@
 - [x] Relatório de Curva ABC (classificação de produtos por valor de consumo)
 - [x] Relatório de Consumo Médio (análise de consumo, previsão de compras, alertas de estoque)
 - [x] Análises Comparativas entre Períodos (comparação de receitas, despesas, lucro e margem)
+- [x] Formatação automática de telefone com máscara (XX) XXXXX-XXXX
+- [x] Calendário visual em campos de data (input type="date" nativo)
 
 ## Funcionalidades Pendentes
 
@@ -32,7 +34,6 @@
 
 ## 🐛 Bugs a Corrigir
 - [x] Validação de data ao marcar conta como paga/recebida (substituir prompt por dialog com campo de data)
-- [ ] Melhorar campo de data para usar calendário visual (igual aos outros campos)
 
 
 
@@ -49,6 +50,8 @@
 
 ## 🚧 Em Desenvolvimento Agora
 - [x] Página de Estoque (visualização, entrada, saída, histórico)
+
+
 
 
 

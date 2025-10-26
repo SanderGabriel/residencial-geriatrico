@@ -5,6 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { Plus, Trash2, Edit } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 export default function Fornecedores() {
   const [showForm, setShowForm] = useState(false);
@@ -133,14 +134,10 @@ export default function Fornecedores() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Telefone
-                    </label>
-                    <input
-                      type="tel"
+                    <PhoneInput
+                      label="Telefone"
                       value={formData.telefone}
-                      onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      onChange={(value) => setFormData({ ...formData, telefone: value })}
                     />
                   </div>
 

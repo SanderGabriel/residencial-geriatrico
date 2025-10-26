@@ -3,6 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { PhoneInput } from "@/components/ui/phone-input";
 
 export default function Unidades() {
   const [showForm, setShowForm] = useState(false);
@@ -116,15 +117,11 @@ export default function Unidades() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Telefone</label>
-                <input
-                  type="text"
-                  value={formData.telefone}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                  placeholder="(00) 00000-0000"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+                         <PhoneInput
+                label="Telefone"
+                value={formData.telefone}
+                onChange={(value) => setFormData({ ...formData, telefone: value })}
+              />            </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium mb-2">Endereço</label>
