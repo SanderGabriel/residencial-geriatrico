@@ -15,6 +15,7 @@ import Produtos from "@/pages/Produtos";
 import Estoque from "@/pages/Estoque";
 import Unidades from "@/pages/Unidades";
 import CurvaABC from "@/pages/CurvaABC";
+import ConsumoMedio from "@/pages/ConsumoMedio";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
               <Route path="/unidades" element={<Unidades />} />
               <Route path="/relatorios" element={<Relatorios />} />
               <Route path="/curva-abc" element={<CurvaABC />} />
+              <Route path="/consumo-medio" element={<ConsumoMedio />} />
               <Route path="/contas-pagar" element={<ContasPagar />} />
               <Route path="/contas-receber" element={<ContasReceber />} />
               <Route path="*" element={<NotFound />} />

@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users, TrendingUp, TrendingDown, Package, Building2, FileText, CreditCard, DollarSign, BarChart3 } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, TrendingUp, TrendingDown, Package, Building2, FileText, CreditCard, DollarSign, BarChart3, TrendingUpDown } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
@@ -39,6 +39,7 @@ const menuItems = [
   { icon: Building2, label: "Unidades", path: "/unidades" },
   { icon: FileText, label: "Relatórios", path: "/relatorios" },
   { icon: BarChart3, label: "Curva ABC", path: "/curva-abc" },
+  { icon: TrendingUpDown, label: "Consumo Médio", path: "/consumo-medio" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";

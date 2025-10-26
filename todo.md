@@ -17,9 +17,9 @@
 - [x] Página de Estoque (entrada, saída, visualização de estoque atual)
 - [x] Página de Unidades (CRUD completo para gestão de filiais)
 - [x] Relatório de Curva ABC (classificação de produtos por valor de consumo)
+- [x] Relatório de Consumo Médio (análise de consumo, previsão de compras, alertas de estoque)
 
 ## Funcionalidades Pendentes
-- [ ] Relatório de Consumo Médio
 - [ ] Análises Comparativas entre períodos
 
 ## Melhorias Futuras
@@ -54,6 +54,8 @@
 
 ## ✅ Concluído Recentemente
 - [x] Página de Unidades (listar, criar, editar, excluir)
+- [x] Relatório de Curva ABC (classificação automática A, B, C)
+- [x] Relatório de Consumo Médio (análise completa com alertas)
 
 
 

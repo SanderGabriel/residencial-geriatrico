@@ -705,6 +705,143 @@ export const appRouter = router({
           estatisticas,
         };
       }),
+    
+    // Consumo Médio - Análise de consumo por produto
+    consumoMedio: protectedProcedure
+      .input(z.object({
+        unidadeId: z.number().nullable().optional(),
+        startDate: z.string(),
+        endDate: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        // Calcular número de dias no período
+        const start = new Date(input.startDate);
+        const end = new Date(input.endDate);
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        const diffMonths = diffDays / 30;
+        
+        // Buscar todas as movimentações de saída no período
+        const conditions = [
+          eq(movimentacoesEstoque.tipo, "saida"),
+          sql`${movimentacoesEstoque.dataMovimentacao} >= ${input.startDate}`,
+          sql`${movimentacoesEstoque.dataMovimentacao} <= ${input.endDate}`
+        ];
+        
+        if (input.unidadeId) {
+          conditions.push(eq(movimentacoesEstoque.unidadeId, input.unidadeId));
+        }
+        
+        const movimentacoes = await db
+          .select({
+            embalagemId: movimentacoesEstoque.embalagemId,
+            quantidade: movimentacoesEstoque.quantidade,
+            dataMovimentacao: movimentacoesEstoque.dataMovimentacao,
+          })
+          .from(movimentacoesEstoque)
+          .where(and(...conditions))
+          .orderBy(movimentacoesEstoque.dataMovimentacao);
+        
+        // Buscar informações de produtos e embalagens
+        const embalagens = await db.select().from(embalagensProduto);
+        const produtosData = await db.select().from(produtos);
+        const categorias = await db.select().from(categoriasProduto);
+        
+        // Buscar estoque atual
+        const estoqueAtual = await db.select().from(estoque);
+        
+        // Agrupar consumo por embalagem
+        const consumoPorEmbalagem: Record<number, {
+          quantidadeTotal: number;
+          ultimaMovimentacao: string | null;
+        }> = {};
+        
+        for (const mov of movimentacoes) {
+          if (!consumoPorEmbalagem[mov.embalagemId]) {
+            consumoPorEmbalagem[mov.embalagemId] = {
+              quantidadeTotal: 0,
+              ultimaMovimentacao: null,
+            };
+          }
+          consumoPorEmbalagem[mov.embalagemId].quantidadeTotal += mov.quantidade;
+          
+          // Atualizar última movimentação
+          const dataAtual = mov.dataMovimentacao?.toString() || null;
+          if (!consumoPorEmbalagem[mov.embalagemId].ultimaMovimentacao || 
+              (dataAtual && dataAtual > consumoPorEmbalagem[mov.embalagemId].ultimaMovimentacao!)) {
+            consumoPorEmbalagem[mov.embalagemId].ultimaMovimentacao = dataAtual;
+          }
+        }
+        
+        // Montar lista de produtos com consumo médio
+        const produtosComConsumo = Object.entries(consumoPorEmbalagem).map(([embalagemId, dados]) => {
+          const embalagem = embalagens.find(e => e.id === parseInt(embalagemId));
+          const produto = produtosData.find((p: any) => p.id === embalagem?.produtoId);
+          const categoria = categorias.find(c => c.id === produto?.categoriaId);
+          
+          // Buscar estoque atual para esta embalagem
+          const estoqueItem = estoqueAtual.find(e => 
+            e.embalagemId === parseInt(embalagemId) && 
+            (!input.unidadeId || e.unidadeId === input.unidadeId)
+          );
+          
+          const consumoDiario = dados.quantidadeTotal / diffDays;
+          const consumoMensal = dados.quantidadeTotal / diffMonths;
+          const estoqueAtualQtd = estoqueItem?.quantidadeAtual || 0;
+          const estoqueMinimo = estoqueItem?.quantidadeMinima || 0;
+          
+          // Calcular dias até acabar o estoque
+          const diasParaAcabar = consumoDiario > 0 ? estoqueAtualQtd / consumoDiario : 999;
+          
+          // Status do estoque
+          let status: "critico" | "atencao" | "normal";
+          if (estoqueAtualQtd <= estoqueMinimo) {
+            status = "critico";
+          } else if (diasParaAcabar <= 7) {
+            status = "atencao";
+          } else {
+            status = "normal";
+          }
+          
+          return {
+            embalagemId: parseInt(embalagemId),
+            produtoNome: produto?.nome || "Desconhecido",
+            categoriaNome: categoria?.nome || "Sem categoria",
+            embalagemDescricao: embalagem?.descricao || "",
+            quantidadeTotal: dados.quantidadeTotal,
+            consumoDiario: parseFloat(consumoDiario.toFixed(2)),
+            consumoMensal: parseFloat(consumoMensal.toFixed(2)),
+            estoqueAtual: estoqueAtualQtd,
+            estoqueMinimo,
+            diasParaAcabar: Math.floor(diasParaAcabar),
+            status,
+            ultimaMovimentacao: dados.ultimaMovimentacao,
+          };
+        });
+        
+        // Ordenar por consumo mensal decrescente
+        produtosComConsumo.sort((a, b) => b.consumoMensal - a.consumoMensal);
+        
+        // Calcular estatísticas
+        const estatisticas = {
+          totalProdutos: produtosComConsumo.length,
+          produtosCriticos: produtosComConsumo.filter(p => p.status === "critico").length,
+          produtosAtencao: produtosComConsumo.filter(p => p.status === "atencao").length,
+          produtosNormal: produtosComConsumo.filter(p => p.status === "normal").length,
+          periodoAnalisado: {
+            dias: diffDays,
+            meses: parseFloat(diffMonths.toFixed(1)),
+          },
+        };
+        
+        return {
+          produtos: produtosComConsumo,
+          estatisticas,
+        };
+      }),
   }),
 
   // === CONTAS A PAGAR ===
