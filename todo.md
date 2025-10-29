@@ -109,3 +109,9 @@
 
 
 
+
+
+
+## 🚧 Em Desenvolvimento Agora
+- [x] Corrigir manipulação de datas conforme documento técnico (DatePickerBR usa UTC ao meio-dia + colunas DATE no MySQL)
+
