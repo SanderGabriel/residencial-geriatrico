@@ -4,10 +4,13 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 
-// Helper para converter string de data (YYYY-MM-DD) em Date UTC sem problemas de timezone
+// Helper para converter string de data (YYYY-MM-DD) em Date sem problemas de timezone
+// Compensa o fuso horário GMT-3 do Brasil para evitar mudança de dia
 function parseLocalDate(dateString: string): Date {
-  // Adicionar 'T00:00:00Z' força interpretação como UTC
-  return new Date(dateString + 'T00:00:00Z');
+  // Criar data em UTC e adicionar 3 horas para compensar GMT-3
+  const date = new Date(dateString + 'T00:00:00Z');
+  date.setUTCHours(12); // Meio-dia UTC garante que não mude de dia em GMT-3
+  return date;
 }
 import { 
   getAllUnidades,

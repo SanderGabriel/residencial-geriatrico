@@ -101,5 +101,5 @@
 
 
 ## 🐛 Bugs Ativos
-- [x] Problema de timezone na edição de contas a pagar (resolvido - substituído input nativo por DateInputBR)
+- [ ] Problema de timezone PERSISTE - parseLocalDate ajustado para meio-dia UTC (testando)
 
