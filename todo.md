@@ -21,6 +21,8 @@
 - [x] Análises Comparativas entre Períodos (comparação de receitas, despesas, lucro e margem)
 - [x] Formatação automática de telefone com máscara (XX) XXXXX-XXXX
 - [x] Calendário visual em campos de data (input type="date" nativo)
+- [x] Botão de Editar em Contas a Pagar (permite editar data de vencimento e observações)
+- [x] Dialog de Pagamento com campo de data brasileiro DD/MM/AAAA e máscara automática
 
 ## Funcionalidades Pendentes
 
@@ -60,6 +62,11 @@
 - [x] Relatório de Curva ABC (classificação automática A, B, C)
 - [x] Relatório de Consumo Médio (análise completa com alertas)
 - [x] Análises Comparativas entre Períodos (comparação completa com interpretações)
+
+
+
+
+
 
 
 

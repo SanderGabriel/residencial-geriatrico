@@ -1051,6 +1051,22 @@ export const appRouter = router({
         }
       }),
 
+    update: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        dataVencimento: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        await db.update(contasPagar)
+          .set({ dataVencimento: new Date(input.dataVencimento) })
+          .where(eq(contasPagar.id, input.id));
+
+        return { success: true };
+      }),
+
     marcarPago: protectedProcedure
       .input(z.object({
         id: z.number(),
