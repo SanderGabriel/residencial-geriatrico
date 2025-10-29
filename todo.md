@@ -100,9 +100,9 @@
 
 
 
-## 🐛 Bugs Ativos
-- [x] Problema de timezone - RESOLVIDO (handleEdit usa string diretamente sem new Date())
-- [x] Implementado date picker visual clicável com react-datepicker
+## 🐛 Bugs Resolvidos
+- [x] Problema de timezone - RESOLVIDO DEFINITIVAMENTE com date picker visual (react-datepicker)
+- [x] Datas agora são selecionadas visualmente e salvas corretamente sem conversão de timezone
 
 
 
