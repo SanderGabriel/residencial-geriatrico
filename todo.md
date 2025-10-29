@@ -23,14 +23,14 @@
 - [x] Calendário visual em campos de data (input type="date" nativo)
 - [x] Botão de Editar em Contas a Pagar (permite editar data de vencimento e observações)
 - [x] Dialog de Pagamento com campo de data brasileiro DD/MM/AAAA e máscara automática
+- [x] Definição automática de estoque mínimo (baseado em consumo dos últimos 90 dias)
+- [x] Sugestões de Compra (recomendações inteligentes com prioridades e quantidades)
 
 ## Funcionalidades Pendentes
 
 ## Melhorias Futuras
 - [ ] Upload de XML de nota fiscal
 - [ ] Escaneamento de nota fiscal
-- [ ] Definição automática de estoque mínimo
-- [ ] Otimização de frequência de compras
 
 
 
@@ -52,6 +52,8 @@
 
 ## 🚧 Em Desenvolvimento Agora
 - [x] Página de Estoque (visualização, entrada, saída, histórico)
+
+
 
 
 

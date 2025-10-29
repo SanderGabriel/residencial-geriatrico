@@ -1270,6 +1270,160 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
+
+  // Gestão Inteligente de Estoque
+  gestaoEstoque: router({
+    calcularEstoqueMinimo: protectedProcedure
+      .input(z.object({
+        unidadeId: z.number().nullable().optional(),
+        diasSeguranca: z.number().default(15), // Dias de estoque de segurança
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        // Buscar todas as movimentações de saída dos últimos 90 dias
+        const dataInicio = new Date();
+        dataInicio.setDate(dataInicio.getDate() - 90);
+
+        const movimentacoes = await db.select()
+          .from(movimentacoesEstoque)
+          .where(
+            and(
+              eq(movimentacoesEstoque.tipo, "saida"),
+              sql`${movimentacoesEstoque.dataMovimentacao} >= ${dataInicio.toISOString().split('T')[0]}`
+            )
+          );
+
+        // Agrupar por embalagem e calcular consumo médio diário
+        const consumoPorEmbalagem = new Map<number, { total: number, dias: number }>();
+
+        movimentacoes.forEach(mov => {
+          const current = consumoPorEmbalagem.get(mov.embalagemId) || { total: 0, dias: 90 };
+          current.total += mov.quantidade;
+          consumoPorEmbalagem.set(mov.embalagemId, current);
+        });
+
+        // Atualizar estoque mínimo para cada embalagem
+        let atualizados = 0;
+        for (const [embalagemId, dados] of Array.from(consumoPorEmbalagem)) {
+          const consumoMedioDiario = dados.total / dados.dias;
+          const estoqueMinimo = Math.ceil(consumoMedioDiario * input.diasSeguranca);
+
+          // Buscar registros de estoque para esta embalagem
+          const estoques = await db.select()
+            .from(estoque)
+            .where(
+              input.unidadeId
+                ? and(
+                    eq(estoque.embalagemId, embalagemId),
+                    eq(estoque.unidadeId, input.unidadeId)
+                  )
+                : eq(estoque.embalagemId, embalagemId)
+            );
+
+          // Atualizar cada registro de estoque
+          for (const est of estoques) {
+            await db.update(estoque)
+              .set({ quantidadeMinima: estoqueMinimo })
+              .where(eq(estoque.id, est.id));
+            atualizados++;
+          }
+        }
+
+        return { success: true, atualizados };
+      }),
+
+    sugestoesCompra: protectedProcedure
+      .input(z.object({
+        unidadeId: z.number().nullable().optional(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+
+        // Buscar estoques abaixo do mínimo ou próximos
+        const estoques = await db.select()
+          .from(estoque)
+          .where(
+            input.unidadeId
+              ? eq(estoque.unidadeId, input.unidadeId)
+              : sql`1=1`
+          );
+
+        const sugestoes = [];
+
+        for (const est of estoques) {
+          // Calcular consumo médio dos últimos 30 dias
+          const dataInicio = new Date();
+          dataInicio.setDate(dataInicio.getDate() - 30);
+
+          const movimentacoes = await db.select()
+            .from(movimentacoesEstoque)
+            .where(
+              and(
+                eq(movimentacoesEstoque.embalagemId, est.embalagemId),
+                eq(movimentacoesEstoque.unidadeId, est.unidadeId),
+                eq(movimentacoesEstoque.tipo, "saida"),
+                sql`${movimentacoesEstoque.dataMovimentacao} >= ${dataInicio.toISOString().split('T')[0]}`
+              )
+            );
+
+          const consumoTotal = movimentacoes.reduce((sum, m) => sum + m.quantidade, 0);
+          const consumoMedioDiario = consumoTotal / 30;
+
+          // Se estoque atual <= estoque mínimo, sugerir compra
+          if (est.quantidadeAtual <= est.quantidadeMinima) {
+            // Buscar informações da embalagem e produto
+            const [embalagem] = await db.select()
+              .from(embalagensProduto)
+              .where(eq(embalagensProduto.id, est.embalagemId));
+
+            if (!embalagem) continue;
+
+            const [produto] = await db.select()
+              .from(produtos)
+              .where(eq(produtos.id, embalagem.produtoId));
+
+            const [unidade] = await db.select()
+              .from(unidades)
+              .where(eq(unidades.id, est.unidadeId));
+
+            // Calcular dias até acabar o estoque
+            const diasRestantes = consumoMedioDiario > 0
+              ? Math.floor(est.quantidadeAtual / consumoMedioDiario)
+              : 999;
+
+            // Quantidade sugerida: estoque para 30 dias - estoque atual
+            const quantidadeSugerida = Math.max(
+              Math.ceil(consumoMedioDiario * 30) - est.quantidadeAtual,
+              est.quantidadeMinima
+            );
+
+            sugestoes.push({
+              produtoNome: produto?.nome || "Desconhecido",
+              embalagemDescricao: embalagem.descricao,
+              unidadeNome: unidade?.nome || "Desconhecida",
+              estoqueAtual: est.quantidadeAtual,
+              estoqueMinimo: est.quantidadeMinima,
+              consumoMedioDiario: Number(consumoMedioDiario.toFixed(2)),
+              diasRestantes,
+              quantidadeSugerida,
+              prioridade: diasRestantes <= 7 ? "alta" : diasRestantes <= 15 ? "media" : "baixa",
+            });
+          }
+        }
+
+        // Ordenar por prioridade (alta > média > baixa) e depois por dias restantes
+        return sugestoes.sort((a, b) => {
+          const prioridadeOrdem: Record<string, number> = { alta: 0, media: 1, baixa: 2 };
+          if (prioridadeOrdem[a.prioridade] !== prioridadeOrdem[b.prioridade]) {
+            return prioridadeOrdem[a.prioridade] - prioridadeOrdem[b.prioridade];
+          }
+          return a.diasRestantes - b.diasRestantes;
+        });
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
