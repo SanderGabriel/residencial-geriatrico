@@ -4,10 +4,10 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 
-// Helper para converter string de data (YYYY-MM-DD) em Date sem problemas de timezone
+// Helper para converter string de data (YYYY-MM-DD) em Date UTC sem problemas de timezone
 function parseLocalDate(dateString: string): Date {
-  const [year, month, day] = dateString.split('-').map(Number);
-  return new Date(year, month - 1, day, 12, 0, 0); // Meio-dia para evitar problemas de timezone
+  // Adicionar 'T00:00:00Z' força interpretação como UTC
+  return new Date(dateString + 'T00:00:00Z');
 }
 import { 
   getAllUnidades,

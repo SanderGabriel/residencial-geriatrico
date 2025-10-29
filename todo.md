@@ -101,5 +101,5 @@
 
 
 ## 🐛 Bugs Ativos
-- [x] Problema de timezone persiste na edição de contas a pagar (resolvido - correção no handleEdit)
+- [x] Problema de timezone na edição de contas a pagar (resolvido - parseLocalDate usa UTC)
 
