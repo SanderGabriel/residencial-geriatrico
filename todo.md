@@ -86,3 +86,7 @@
 - [x] Edição de conta a pagar não atualiza a lista após salvar (resolvido)
 - [x] Após editar conta, fechar formulário e voltar para lista atualizada (resolvido)
 
+
+
+- [x] Bug de timezone: datas sendo salvas com 1 dia a menos (resolvido com parseLocalDate)
+
