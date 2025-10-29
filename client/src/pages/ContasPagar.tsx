@@ -10,8 +10,7 @@ import { CreditCard, Plus, Check, Trash2, Edit } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DateInputBR } from "@/components/ui/date-input-br";
-
+import { DatePickerBR } from "../components/ui/date-picker-br";
 export default function ContasPagar() {
   const [selectedUnidade, setSelectedUnidade] = useState<string>("all");
   const [showForm, setShowForm] = useState(false);
@@ -324,12 +323,12 @@ export default function ContasPagar() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Data de Vencimento *</Label>
-                    <DateInputBR
-                      value={formData.dataVencimento}
-                      onChange={(value) => setFormData({ ...formData, dataVencimento: value })}
-                      required
-                    />
-                  </div>
+                    <DatePickerBR
+                value={formData.dataVencimento}
+                onChange={(value) => setFormData({ ...formData, dataVencimento: value })}
+                placeholder="DD/MM/AAAA"
+                required
+              />  </div>
 
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
@@ -541,7 +540,7 @@ export default function ContasPagar() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <DateInputBR
+            <DatePickerBR
               label="Data do Pagamento"
               value={dataPagamento}
               onChange={setDataPagamento}
