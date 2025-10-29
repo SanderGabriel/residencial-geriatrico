@@ -113,5 +113,13 @@
 
 
 ## 🚧 Em Desenvolvimento Agora
-- [x] Corrigir manipulação de datas conforme documento técnico (DatePickerBR usa UTC ao meio-dia + colunas DATE no MySQL)
+
+
+
+
+## ✅ Correção Final de Timezone (29/10/2025)
+- [x] Modificado DatePickerBR para usar timezone local em vez de UTC
+- [x] Alteradas colunas de data no MySQL de DATETIME para DATE
+- [x] Testado e confirmado: datas são salvas corretamente no banco como '2025-10-29'
+- [x] Interface exibe corretamente em formato DD/MM/AAAA (29/10/2025)
 

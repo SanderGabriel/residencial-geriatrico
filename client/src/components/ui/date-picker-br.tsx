@@ -21,19 +21,20 @@ export function DatePickerBR({
   required = false,
 }: DatePickerBRProps) {
   
-  // Converter string YYYY-MM-DD para Date object usando UTC ao meio-dia
+  // Converter string YYYY-MM-DD para Date object (timezone local ao meio-dia)
   const stringToDate = (dateStr: string): Date | null => {
     if (!dateStr || dateStr.length !== 10) return null;
     const [y, m, d] = dateStr.split('-').map(Number);
-    return new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+    // Usar timezone local ao meio-dia para evitar mudança de dia
+    return new Date(y, m - 1, d, 12, 0, 0);
   };
 
-  // Converter Date object para string YYYY-MM-DD usando UTC
+  // Converter Date object para string YYYY-MM-DD (timezone local)
   const dateToString = (date: Date | null): string => {
     if (!date) return '';
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(date.getUTCDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 
