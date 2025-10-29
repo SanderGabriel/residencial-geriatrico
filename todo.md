@@ -73,3 +73,9 @@
 
 
 
+
+
+
+## 🐛 Bugs Reportados
+- [x] Página de Despesas com lentidão excessiva (resolvido com índices no banco)
+

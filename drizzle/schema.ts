@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, date, boolean, unique } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, date, boolean, unique, index } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -83,7 +83,10 @@ export const receitas = mysqlTable("receitas", {
   usuarioId: int("usuarioId").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  dataReceitaIdx: index("idx_receitas_data").on(table.dataReceita),
+  unidadeIdIdx: index("idx_receitas_unidade").on(table.unidadeId),
+}));
 
 export type Receita = typeof receitas.$inferSelect;
 export type InsertReceita = typeof receitas.$inferInsert;
@@ -105,7 +108,10 @@ export const despesas = mysqlTable("despesas", {
   usuarioId: int("usuarioId").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => ({
+  dataDespesaIdx: index("idx_despesas_data").on(table.dataDespesa),
+  unidadeIdIdx: index("idx_despesas_unidade").on(table.unidadeId),
+}));
 
 export type Despesa = typeof despesas.$inferSelect;
 export type InsertDespesa = typeof despesas.$inferInsert;

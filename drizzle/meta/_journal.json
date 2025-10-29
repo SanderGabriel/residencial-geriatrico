@@ -36,6 +36,20 @@
       "when": 1761515380379,
       "tag": "0004_silky_dark_phoenix",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1761747240620,
+      "tag": "0005_equal_franklin_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1761747288764,
+      "tag": "0006_marvelous_harpoon",
+      "breakpoints": true
     }
   ]
 }
