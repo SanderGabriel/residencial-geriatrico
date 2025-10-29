@@ -151,12 +151,9 @@ export default function ContasPagar() {
 
   const handleEdit = (conta: any) => {
     setEditingId(conta.id);
-    // Converter data do banco para formato local YYYY-MM-DD sem problema de timezone
-    const dataVenc = new Date(conta.dataVencimento);
-    const year = dataVenc.getFullYear();
-    const month = String(dataVenc.getMonth() + 1).padStart(2, '0');
-    const day = String(dataVenc.getDate()).padStart(2, '0');
-    const dataLocal = `${year}-${month}-${day}`;
+    // Extrair data como string YYYY-MM-DD diretamente, sem conversão de timezone
+    // O banco retorna Date em UTC, então usamos toISOString e pegamos apenas a parte da data
+    const dataLocal = new Date(conta.dataVencimento).toISOString().split('T')[0];
     
     setFormData({
       unidadeId: conta.unidadeId.toString(),
@@ -326,10 +323,9 @@ export default function ContasPagar() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Data de Vencimento *</Label>
-                    <Input
-                      type="date"
+                    <DateInputBR
                       value={formData.dataVencimento}
-                      onChange={(e) => setFormData({ ...formData, dataVencimento: e.target.value })}
+                      onChange={(value) => setFormData({ ...formData, dataVencimento: value })}
                       required
                     />
                   </div>
