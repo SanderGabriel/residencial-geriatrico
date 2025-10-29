@@ -79,3 +79,10 @@
 ## 🐛 Bugs Reportados
 - [x] Página de Despesas com lentidão excessiva (resolvido com índices no banco)
 
+
+
+
+## 🐛 Bugs em Correção
+- [x] Edição de conta a pagar não atualiza a lista após salvar (resolvido)
+- [x] Após editar conta, fechar formulário e voltar para lista atualizada (resolvido)
+

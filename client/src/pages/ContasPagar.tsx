@@ -98,6 +98,7 @@ export default function ContasPagar() {
       toast.success("Data de vencimento atualizada!");
       refetch();
       setEditingId(null);
+      setShowForm(false);
       setFormData({
         unidadeId: "",
         categoriaDespesaId: "",
