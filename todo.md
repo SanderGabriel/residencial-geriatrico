@@ -101,5 +101,5 @@
 
 
 ## 🐛 Bugs Ativos
-- [ ] Problema de timezone PERSISTE - parseLocalDate ajustado para meio-dia UTC (testando)
+- [ ] Problema de timezone - schema modificado para mode: 'string', removido parseLocalDate (testando)
 

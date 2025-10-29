@@ -203,8 +203,8 @@ export const appRouter = router({
         const { dataReceita, dataVencimento, ...rest } = input;
         const result = await db.insert(receitas).values({
           ...rest,
-          dataReceita: new Date(dataReceita),
-          dataVencimento: dataVencimento ? new Date(dataVencimento) : undefined,
+          dataReceita: dataReceita,
+          dataVencimento: dataVencimento || null,
           usuarioId: ctx.user.id,
         });
         
@@ -228,8 +228,8 @@ export const appRouter = router({
         
         const { id, dataReceita, dataVencimento, ...data } = input;
         const updateData: any = { ...data };
-        if (dataReceita) updateData.dataReceita = new Date(dataReceita);
-        if (dataVencimento) updateData.dataVencimento = new Date(dataVencimento);
+        if (dataReceita) updateData.dataReceita = dataReceita;
+        if (dataVencimento) updateData.dataVencimento = dataVencimento;
         
         await db.update(receitas).set(updateData).where(eq(receitas.id, id));
         
@@ -277,8 +277,8 @@ export const appRouter = router({
         const { dataDespesa, dataVencimento, ...rest } = input;
         const result = await db.insert(despesas).values({
           ...rest,
-          dataDespesa: new Date(dataDespesa),
-          dataVencimento: dataVencimento ? new Date(dataVencimento) : undefined,
+          dataDespesa: dataDespesa,
+          dataVencimento: dataVencimento || null,
           usuarioId: ctx.user.id,
         });
         
@@ -302,8 +302,8 @@ export const appRouter = router({
         
         const { id, dataDespesa, dataVencimento, ...data } = input;
         const updateData: any = { ...data };
-        if (dataDespesa) updateData.dataDespesa = new Date(dataDespesa);
-        if (dataVencimento) updateData.dataVencimento = new Date(dataVencimento);
+        if (dataDespesa) updateData.dataDespesa = dataDespesa;
+        if (dataVencimento) updateData.dataVencimento = dataVencimento;
         
         await db.update(despesas).set(updateData).where(eq(despesas.id, id));
         
@@ -453,7 +453,7 @@ export const appRouter = router({
           quantidade: input.quantidade,
           precoUnitario: input.precoUnitario,
           descricao: input.descricao,
-          dataMovimentacao: parseLocalDate(input.dataMovimentacao),
+          dataMovimentacao: new Date(),
           usuarioId: ctx.user.id,
         });
         
@@ -1008,7 +1008,7 @@ export const appRouter = router({
             fornecedorId: input.fornecedorId || null,
             descricao: `${input.descricao} (Parcelado ${input.numeroParcelas}x)`,
             valorTotal: input.valorTotal,
-            dataVencimento: parseLocalDate(input.dataVencimento),
+            dataVencimento: input.dataVencimento,
             observacoes: input.observacoes || null,
             parcelaNumero: null,
             parcelaTotal: input.numeroParcelas,
@@ -1018,12 +1018,13 @@ export const appRouter = router({
 
           const contaPaiId = contaPai.insertId;
           const valorParcela = Math.floor(input.valorTotal / input.numeroParcelas);
-          const dataBase = parseLocalDate(input.dataVencimento);
+          const dataBase = input.dataVencimento;
 
           // Criar parcelas
           for (let i = 1; i <= input.numeroParcelas; i++) {
-            const dataVencimentoParcela = new Date(dataBase);
-            dataVencimentoParcela.setMonth(dataVencimentoParcela.getMonth() + (i - 1));
+            const dataBaseDate = new Date(dataBase + 'T00:00:00');
+            dataBaseDate.setMonth(dataBaseDate.getMonth() + (i - 1));
+            const dataVencimentoParcela = dataBaseDate.toISOString().split('T')[0];
 
             await db.insert(contasPagar).values({
               unidadeId: input.unidadeId,
@@ -1048,7 +1049,7 @@ export const appRouter = router({
             fornecedorId: input.fornecedorId || null,
             descricao: input.descricao,
             valorTotal: input.valorTotal,
-            dataVencimento: parseLocalDate(input.dataVencimento),
+            dataVencimento: input.dataVencimento,
             observacoes: input.observacoes || null,
             parcelaNumero: null,
             parcelaTotal: null,
@@ -1070,7 +1071,7 @@ export const appRouter = router({
         if (!db) throw new Error("Database not available");
 
         await db.update(contasPagar)
-          .set({ dataVencimento: parseLocalDate(input.dataVencimento) })
+          .set({ dataVencimento: input.dataVencimento })
           .where(eq(contasPagar.id, input.id));
 
         return { success: true };
@@ -1096,7 +1097,7 @@ export const appRouter = router({
           fornecedorId: conta.fornecedorId,
           descricao: conta.descricao,
           valor: conta.valorTotal,
-          dataDespesa: parseLocalDate(input.dataPagamento),
+          dataDespesa: input.dataPagamento,
           observacoes: conta.observacoes,
           usuarioId: ctx.user!.id,
         });
@@ -1104,7 +1105,7 @@ export const appRouter = router({
         // Atualizar conta
         await db.update(contasPagar)
           .set({
-            dataPagamento: parseLocalDate(input.dataPagamento),
+            dataPagamento: input.dataPagamento,
             despesaId: Number(despesa.insertId),
           })
           .where(eq(contasPagar.id, input.id));
@@ -1178,7 +1179,7 @@ export const appRouter = router({
             categoriaReceitaId: input.categoriaReceitaId,
             descricao: `${input.descricao} (Parcelado ${input.numeroParcelas}x)`,
             valorTotal: input.valorTotal,
-            dataVencimento: parseLocalDate(input.dataVencimento),
+            dataVencimento: input.dataVencimento,
             observacoes: input.observacoes || null,
             parcelaNumero: null,
             parcelaTotal: input.numeroParcelas,
@@ -1188,12 +1189,13 @@ export const appRouter = router({
 
           const contaPaiId = contaPai.insertId;
           const valorParcela = Math.floor(input.valorTotal / input.numeroParcelas);
-          const dataBase = parseLocalDate(input.dataVencimento);
+          const dataBase = input.dataVencimento;
 
           // Criar parcelas
           for (let i = 1; i <= input.numeroParcelas; i++) {
-            const dataVencimentoParcela = new Date(dataBase);
-            dataVencimentoParcela.setMonth(dataVencimentoParcela.getMonth() + (i - 1));
+            const dataBaseDate = new Date(dataBase + 'T00:00:00');
+            dataBaseDate.setMonth(dataBaseDate.getMonth() + (i - 1));
+            const dataVencimentoParcela = dataBaseDate.toISOString().split('T')[0];
 
             await db.insert(contasReceber).values({
               unidadeId: input.unidadeId,
@@ -1216,7 +1218,7 @@ export const appRouter = router({
             categoriaReceitaId: input.categoriaReceitaId,
             descricao: input.descricao,
             valorTotal: input.valorTotal,
-            dataVencimento: parseLocalDate(input.dataVencimento),
+            dataVencimento: input.dataVencimento,
             observacoes: input.observacoes || null,
             parcelaNumero: null,
             parcelaTotal: null,
@@ -1247,7 +1249,7 @@ export const appRouter = router({
           categoriaId: conta.categoriaReceitaId,
           descricao: conta.descricao,
           valor: conta.valorTotal,
-          dataReceita: parseLocalDate(input.dataRecebimento),
+          dataReceita: input.dataRecebimento,
           observacoes: conta.observacoes,
           usuarioId: ctx.user!.id,
         });
@@ -1255,7 +1257,7 @@ export const appRouter = router({
         // Atualizar conta
         await db.update(contasReceber)
           .set({
-            dataRecebimento: parseLocalDate(input.dataRecebimento),
+            dataRecebimento: input.dataRecebimento,
             receitaId: Number(receita.insertId),
           })
           .where(eq(contasReceber.id, input.id));

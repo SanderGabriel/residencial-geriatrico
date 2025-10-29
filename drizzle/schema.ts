@@ -76,8 +76,8 @@ export const receitas = mysqlTable("receitas", {
   categoriaId: int("categoriaId").notNull(),
   descricao: varchar("descricao", { length: 255 }),
   valor: int("valor").notNull(), // Valor em centavos
-  dataReceita: date("dataReceita").notNull(),
-  dataVencimento: date("dataVencimento"),
+  dataReceita: date("dataReceita", { mode: 'string' }).notNull(),
+  dataVencimento: date("dataVencimento", { mode: 'string' }),
   observacoes: text("observacoes"),
   status: mysqlEnum("status", ["pendente", "recebida", "cancelada"]).default("recebida").notNull(),
   usuarioId: int("usuarioId").notNull(),
@@ -101,8 +101,8 @@ export const despesas = mysqlTable("despesas", {
   fornecedorId: int("fornecedorId"),
   descricao: varchar("descricao", { length: 255 }),
   valor: int("valor").notNull(), // Valor em centavos
-  dataDespesa: date("dataDespesa").notNull(),
-  dataVencimento: date("dataVencimento"),
+  dataDespesa: date("dataDespesa", { mode: 'string' }).notNull(),
+  dataVencimento: date("dataVencimento", { mode: 'string' }),
   observacoes: text("observacoes"),
   status: mysqlEnum("status", ["pendente", "paga", "cancelada"]).default("paga").notNull(),
   usuarioId: int("usuarioId").notNull(),
@@ -269,8 +269,8 @@ export const contasPagar = mysqlTable("contas_pagar", {
   fornecedorId: int("fornecedorId"),
   descricao: varchar("descricao", { length: 255 }).notNull(),
   valorTotal: int("valorTotal").notNull(), // Valor em centavos
-  dataVencimento: date("dataVencimento").notNull(),
-  dataPagamento: date("dataPagamento"),
+  dataVencimento: date("dataVencimento", { mode: 'string' }).notNull(),
+  dataPagamento: date("dataPagamento", { mode: 'string' }),
   despesaId: int("despesaId"), // ID da despesa gerada quando pago
   observacoes: text("observacoes"),
   parcelaNumero: int("parcelaNumero"), // Número da parcela (1, 2, 3...)
@@ -293,8 +293,8 @@ export const contasReceber = mysqlTable("contas_receber", {
   categoriaReceitaId: int("categoriaReceitaId").notNull(),
   descricao: varchar("descricao", { length: 255 }).notNull(),
   valorTotal: int("valorTotal").notNull(), // Valor em centavos
-  dataVencimento: date("dataVencimento").notNull(),
-  dataRecebimento: date("dataRecebimento"),
+  dataVencimento: date("dataVencimento", { mode: 'string' }).notNull(),
+  dataRecebimento: date("dataRecebimento", { mode: 'string' }),
   receitaId: int("receitaId"), // ID da receita gerada quando recebido
   observacoes: text("observacoes"),
   parcelaNumero: int("parcelaNumero"), // Número da parcela (1, 2, 3...)
