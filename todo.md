@@ -101,5 +101,5 @@
 
 
 ## 🐛 Bugs Ativos
-- [ ] Problema de timezone - schema modificado para mode: 'string', removido parseLocalDate (testando)
+- [x] Problema de timezone - RESOLVIDO (handleEdit usa string diretamente sem new Date())
 

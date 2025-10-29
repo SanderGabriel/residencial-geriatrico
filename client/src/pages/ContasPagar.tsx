@@ -153,7 +153,8 @@ export default function ContasPagar() {
     setEditingId(conta.id);
     // Extrair data como string YYYY-MM-DD diretamente, sem conversão de timezone
     // O banco retorna Date em UTC, então usamos toISOString e pegamos apenas a parte da data
-    const dataLocal = new Date(conta.dataVencimento).toISOString().split('T')[0];
+    // Como o banco retorna string YYYY-MM-DD, usar diretamente
+    const dataLocal = conta.dataVencimento;
     
     setFormData({
       unidadeId: conta.unidadeId.toString(),
