@@ -98,3 +98,8 @@
 
 
 
+
+
+## 🐛 Bugs Ativos
+- [x] Problema de timezone persiste na edição de contas a pagar (resolvido - correção no handleEdit)
+

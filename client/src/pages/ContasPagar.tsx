@@ -151,13 +151,20 @@ export default function ContasPagar() {
 
   const handleEdit = (conta: any) => {
     setEditingId(conta.id);
+    // Converter data do banco para formato local YYYY-MM-DD sem problema de timezone
+    const dataVenc = new Date(conta.dataVencimento);
+    const year = dataVenc.getFullYear();
+    const month = String(dataVenc.getMonth() + 1).padStart(2, '0');
+    const day = String(dataVenc.getDate()).padStart(2, '0');
+    const dataLocal = `${year}-${month}-${day}`;
+    
     setFormData({
       unidadeId: conta.unidadeId.toString(),
       categoriaDespesaId: conta.categoriaDespesaId.toString(),
       fornecedorId: conta.fornecedorId?.toString() || "",
       descricao: conta.descricao,
       valorTotal: (conta.valorTotal / 100).toString(),
-      dataVencimento: new Date(conta.dataVencimento).toISOString().split('T')[0],
+      dataVencimento: dataLocal,
       observacoes: conta.observacoes || "",
       parcelado: false,
       numeroParcelas: "1",
