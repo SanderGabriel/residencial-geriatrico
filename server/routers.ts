@@ -1423,6 +1423,132 @@ export const appRouter = router({
           return a.diasRestantes - b.diasRestantes;
         });
       }),
+
+    detalhesProduto: protectedProcedure
+      .input(z.object({
+        produtoId: z.number(),
+        unidadeId: z.number().nullable().optional(),
+      }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+
+        // Buscar informações do produto
+        const [produto] = await db.select()
+          .from(produtos)
+          .where(eq(produtos.id, input.produtoId));
+
+        if (!produto) return null;
+
+        // Buscar categoria
+        const [categoria] = await db.select()
+          .from(categoriasProduto)
+          .where(eq(categoriasProduto.id, produto.categoriaId));
+
+        // Buscar embalagens
+        const embalagens = await db.select()
+          .from(embalagensProduto)
+          .where(eq(embalagensProduto.produtoId, input.produtoId));
+
+        // Buscar estoque por unidade
+        const estoques = [];
+        for (const embalagem of embalagens) {
+          const estoquesEmbalagem = await db.select()
+            .from(estoque)
+            .where(
+              input.unidadeId
+                ? and(
+                    eq(estoque.embalagemId, embalagem.id),
+                    eq(estoque.unidadeId, input.unidadeId)
+                  )
+                : eq(estoque.embalagemId, embalagem.id)
+            );
+
+          for (const est of estoquesEmbalagem) {
+            const [unidade] = await db.select()
+              .from(unidades)
+              .where(eq(unidades.id, est.unidadeId));
+
+            estoques.push({
+              embalagemDescricao: embalagem.descricao,
+              unidadeNome: unidade?.nome || "Desconhecida",
+              quantidadeAtual: est.quantidadeAtual,
+              quantidadeMinima: est.quantidadeMinima,
+            });
+          }
+        }
+
+        // Buscar movimentações dos últimos 12 meses
+        const dataInicio = new Date();
+        dataInicio.setMonth(dataInicio.getMonth() - 12);
+
+        const movimentacoes = [];
+        for (const embalagem of embalagens) {
+          const movs = await db.select()
+            .from(movimentacoesEstoque)
+            .where(
+              and(
+                eq(movimentacoesEstoque.embalagemId, embalagem.id),
+                input.unidadeId
+                  ? eq(movimentacoesEstoque.unidadeId, input.unidadeId)
+                  : sql`1=1`,
+                sql`${movimentacoesEstoque.dataMovimentacao} >= ${dataInicio.toISOString().split('T')[0]}`
+              )
+            );
+
+          for (const mov of movs) {
+            const [unidade] = await db.select()
+              .from(unidades)
+              .where(eq(unidades.id, mov.unidadeId));
+
+            movimentacoes.push({
+              id: mov.id,
+              tipo: mov.tipo,
+              quantidade: mov.quantidade,
+              precoUnitario: mov.precoUnitario,
+              descricao: mov.descricao,
+              dataMovimentacao: mov.dataMovimentacao,
+              embalagemDescricao: embalagem.descricao,
+              unidadeNome: unidade?.nome || "Desconhecida",
+            });
+          }
+        }
+
+        // Ordenar movimentações por data (mais recente primeiro)
+        movimentacoes.sort((a, b) => 
+          new Date(b.dataMovimentacao).getTime() - new Date(a.dataMovimentacao).getTime()
+        );
+
+        // Calcular estatísticas
+        const saidas = movimentacoes.filter(m => m.tipo === "saida");
+        const entradas = movimentacoes.filter(m => m.tipo === "entrada");
+        
+        const consumoTotal = saidas.reduce((sum, m) => sum + m.quantidade, 0);
+        const consumoMedio = saidas.length > 0 ? consumoTotal / 12 : 0; // Média mensal
+
+        const ultimaCompra = entradas.length > 0 ? entradas[0].dataMovimentacao : null;
+        const ultimoConsumo = saidas.length > 0 ? saidas[0].dataMovimentacao : null;
+
+        return {
+          produto: {
+            id: produto.id,
+            nome: produto.nome,
+            categoriaNome: categoria?.nome || "Sem categoria",
+            tipoEmbalagem: produto.tipoEmbalagem,
+          },
+          embalagens,
+          estoques,
+          movimentacoes,
+          estatisticas: {
+            consumoTotal,
+            consumoMedioMensal: Number(consumoMedio.toFixed(2)),
+            totalEntradas: entradas.length,
+            totalSaidas: saidas.length,
+            ultimaCompra,
+            ultimoConsumo,
+          },
+        };
+      }),
   }),
 });
 

@@ -18,6 +18,7 @@ import CurvaABC from "@/pages/CurvaABC";
 import ConsumoMedio from "@/pages/ConsumoMedio";
 import AnalisesComparativas from "@/pages/AnalisesComparativas";
 import SugestoesCompra from "@/pages/SugestoesCompra";
+import DetalhesProduto from "@/pages/DetalhesProduto";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
               <Route path="/consumo-medio" element={<ConsumoMedio />} />
               <Route path="/analises-comparativas" element={<AnalisesComparativas />} />
               <Route path="/sugestoes-compra" element={<SugestoesCompra />} />
+              <Route path="/produtos/:id" element={<DetalhesProduto />} />
               <Route path="/contas-pagar" element={<ContasPagar />} />
               <Route path="/contas-receber" element={<ContasReceber />} />
               <Route path="*" element={<NotFound />} />

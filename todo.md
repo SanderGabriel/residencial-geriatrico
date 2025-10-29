@@ -25,6 +25,7 @@
 - [x] Dialog de Pagamento com campo de data brasileiro DD/MM/AAAA e máscara automática
 - [x] Definição automática de estoque mínimo (baseado em consumo dos últimos 90 dias)
 - [x] Sugestões de Compra (recomendações inteligentes com prioridades e quantidades)
+- [x] Página de Detalhes do Produto (histórico completo de consumo e compras com gráficos)
 
 ## Funcionalidades Pendentes
 
@@ -91,4 +92,9 @@
 
 
 - [x] Bug de timezone: datas sendo salvas com 1 dia a menos (resolvido com parseLocalDate)
+
+
+
+
+
 

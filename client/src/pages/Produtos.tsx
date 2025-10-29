@@ -2,11 +2,13 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Plus, Trash2, Package } from "lucide-react";
+import { Plus, Trash2, Package, Eye } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function Produtos() {
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [selectedCategoria, setSelectedCategoria] = useState<string>("all");
   const [formData, setFormData] = useState({
@@ -235,9 +237,17 @@ export default function Produtos() {
                       </div>
                       <Button
                         size="sm"
+                        variant="outline"
+                        onClick={() => navigate(`/produtos/${produto.id}`)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver Detalhes
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="destructive"
                         onClick={() => {
-                          if (confirm(`Tem certeza que deseja excluir ${produto.nome}?`)) {
+                          if (confirm("Tem certeza que deseja excluir este produto?")) {
                             deleteProdutoMutation.mutate({ id: produto.id });
                           }
                         }}
