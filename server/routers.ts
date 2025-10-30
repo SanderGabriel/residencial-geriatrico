@@ -453,7 +453,7 @@ export const appRouter = router({
           quantidade: input.quantidade,
           precoUnitario: input.precoUnitario,
           descricao: input.descricao,
-          dataMovimentacao: new Date(),
+          dataMovimentacao: new Date().toISOString().split('T')[0],
           usuarioId: ctx.user.id,
         });
         

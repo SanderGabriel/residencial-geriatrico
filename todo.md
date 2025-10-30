@@ -123,3 +123,12 @@
 - [x] Testado e confirmado: datas são salvas corretamente no banco como '2025-10-29'
 - [x] Interface exibe corretamente em formato DD/MM/AAAA (29/10/2025)
 
+
+
+
+## ✅ Bug de Timezone RESOLVIDO DEFINITIVAMENTE (30/10/2025)
+- [x] DatePickerBR configurado para usar timezone local (new Date(y, m-1, d, 12, 0, 0))
+- [x] Colunas de data alteradas de DATETIME para DATE no MySQL
+- [x] Schema Drizzle com mode: 'string' em todos os campos date
+- [x] Testado: Interface exibe 30/10/2025 e banco armazena '2025-10-30' corretamente
+

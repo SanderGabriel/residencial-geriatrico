@@ -193,7 +193,7 @@ export const precosFornecedor = mysqlTable("precos_fornecedor", {
   embalagemId: int("embalagemId").notNull(),
   fornecedorId: int("fornecedorId").notNull(),
   precoCusto: int("precoCusto").notNull(), // Preço em centavos
-  dataPreco: date("dataPreco").notNull(),
+  dataPreco: date("dataPreco", { mode: 'string' }).notNull(),
   ativo: boolean("ativo").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -232,7 +232,7 @@ export const movimentacoesEstoque = mysqlTable("movimentacoes_estoque", {
   descricao: varchar("descricao", { length: 255 }),
   referenciaId: int("referenciaId"), // ID da compra/despesa relacionada
   usuarioId: int("usuarioId").notNull(),
-  dataMovimentacao: date("dataMovimentacao").notNull(),
+  dataMovimentacao: date("dataMovimentacao", { mode: 'string' }).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
