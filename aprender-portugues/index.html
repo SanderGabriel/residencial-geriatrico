@@ -676,6 +676,45 @@ body {
 /* ===== UTILITÁRIOS ===== */
 .color-bar { height: 6px; border-radius: var(--radius) var(--radius) 0 0; display: block; width: 100%; }
 
+/* ===== TOGGLES DE SOM/VOZ ===== */
+.home-toggles {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.toggle-btn {
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  color: white;
+  border-radius: 30px;
+  padding: 7px 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  transition: opacity 0.2s, background 0.2s;
+}
+.toggle-btn:hover { background: rgba(255,255,255,0.32); }
+.toggle-btn.off { opacity: 0.45; }
+
+/* ===== BOTÃO DE FALAR ===== */
+.speak-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 4px;
+  vertical-align: middle;
+  opacity: 0.55;
+  transition: opacity 0.15s, transform 0.15s;
+  line-height: 1;
+}
+.speak-btn:hover { opacity: 1; transform: scale(1.2); }
+.speak-btn.speaking { opacity: 1; animation: pulse 0.6s ease infinite alternate; }
+@keyframes pulse { from { transform: scale(1); } to { transform: scale(1.25); } }
+
 /* Responsividade */
 @media (max-width: 480px) {
   .home-title { font-size: 1.7rem; }
@@ -701,7 +740,11 @@ body {
     <h1 class="home-title">Aprender com a Luna!</h1>
     <p class="home-subtitle">Escolha um tema para estudar e se divertir 🎉</p>
     <div class="stars-counter" id="total-stars-display">⭐ 0 estrelas ganhas</div>
-    <button onclick="resetProgress()" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;border-radius:30px;padding:7px 20px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;margin-bottom:8px;">🔄 Zerar progresso</button>
+    <div class="home-toggles">
+      <button id="btn-sound" class="toggle-btn" onclick="toggleSound()">🔊 Som</button>
+      <button id="btn-voice" class="toggle-btn" onclick="toggleVoice()">🗣️ Voz alta</button>
+      <button onclick="resetProgress()" class="toggle-btn">🔄 Zerar</button>
+    </div>
   </div>
   <div class="topics-grid" id="topics-grid"></div>
 </div>
@@ -2256,6 +2299,98 @@ function saveProgress() {
   localStorage.setItem('luna-stars', JSON.stringify({ total: totalStars, topics: topicStars }));
 }
 
+/* ===================================================
+   SOM (Web Audio API)
+   =================================================== */
+let soundEnabled = true;
+let voiceEnabled = true;
+let _audioCtx = null;
+
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+
+function playSuccess() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    [[523,0],[659,0.1],[784,0.2],[1047,0.32]].forEach(([freq, t]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0, ctx.currentTime + t);
+      g.gain.linearRampToValueAtTime(0.22, ctx.currentTime + t + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.42);
+      o.start(ctx.currentTime + t);
+      o.stop(ctx.currentTime + t + 0.45);
+    });
+  } catch(e) {}
+}
+
+function playError() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(240, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.38);
+    g.gain.setValueAtTime(0.28, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.42);
+    o.start(ctx.currentTime);
+    o.stop(ctx.currentTime + 0.45);
+  } catch(e) {}
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  const btn = document.getElementById('btn-sound');
+  if (btn) {
+    btn.textContent = soundEnabled ? '🔊 Som' : '🔇 Som';
+    btn.classList.toggle('off', !soundEnabled);
+  }
+  if (soundEnabled) playSuccess();
+}
+
+/* ===================================================
+   VOZ (Web Speech API)
+   =================================================== */
+function stripHtml(html) {
+  return html.replace(/<[^>]*>/g,'').replace(/\n/g,' ').replace(/\s+/g,' ').trim();
+}
+
+function speak(text, onEnd) {
+  if (!voiceEnabled || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(stripHtml(String(text)));
+  u.lang = 'pt-BR';
+  u.rate = 0.82;
+  u.pitch = 1.05;
+  if (onEnd) u.onend = onEnd;
+  window.speechSynthesis.speak(u);
+}
+
+function speakQuestion(text) {
+  if (!voiceEnabled) return;
+  const btn = document.getElementById('speak-q-btn');
+  if (btn) btn.classList.add('speaking');
+  speak(text, () => { if (btn) btn.classList.remove('speaking'); });
+}
+
+function toggleVoice() {
+  voiceEnabled = !voiceEnabled;
+  const btn = document.getElementById('btn-voice');
+  if (btn) {
+    btn.textContent = voiceEnabled ? '🗣️ Voz alta' : '🔕 Voz alta';
+    btn.classList.toggle('off', !voiceEnabled);
+  }
+  if (voiceEnabled) speak('Voz ativada!');
+  else window.speechSynthesis && window.speechSynthesis.cancel();
+}
+
 function resetProgress() {
   if (!confirm('Zerar tudo? As estrelas e o progresso serão apagados. 🔄')) return;
   totalStars = 0;
@@ -2369,10 +2504,14 @@ function renderExercise() {
 
   answered = false;
 
+  const qText = ex.question;
   let exHTML = `
     <div class="exercise-card" id="exercise-card">
       <div class="exercise-number">Questão ${currentExerciseIndex + 1} de ${total}</div>
-      <div class="exercise-question">${ex.question.replace(/\n/g, '<br>')}</div>
+      <div class="exercise-question">
+        ${qText.replace(/\n/g, '<br>')}
+        <button id="speak-q-btn" class="speak-btn" onclick="speakQuestion(${JSON.stringify(qText)})" title="Ouvir pergunta">🔊</button>
+      </div>
   `;
 
   if (ex.type === 'mc') {
@@ -2414,6 +2553,9 @@ function renderExercise() {
       if (inp) inp.focus();
     }, 100);
   }
+
+  // Auto-falar a pergunta se voz ativada
+  if (voiceEnabled) setTimeout(() => speakQuestion(qText), 500);
 }
 
 function checkMC(selectedIndex) {
@@ -2433,11 +2575,13 @@ function checkMC(selectedIndex) {
     selectedBtn.classList.add('correct');
     showFeedback(true, '🌟 Muito bem! Acertou! 🌟');
     score++;
+    playSuccess();
     celebrate();
   } else {
     selectedBtn.classList.add('wrong');
     correctBtn.classList.add('show-correct');
     showFeedback(false, `Ops! A resposta correta é a opção <strong>${['A','B','C','D'][ex.correct]}</strong>.<br><br>${ex.explanation}`);
+    playError();
     shakeCard();
   }
 
@@ -2466,6 +2610,7 @@ function checkFill() {
     input.classList.add('correct');
     showFeedback(true, '🌟 Muito bem! Acertou! 🌟');
     score++;
+    playSuccess();
     celebrate();
   } else {
     input.classList.add('wrong');
@@ -2473,6 +2618,7 @@ function checkFill() {
       ? ex.accepted.join('" ou "')
       : ex.correct;
     showFeedback(false, `Ops! Uma resposta correta seria: <strong>"${correctStr}"</strong>.<br><br>${ex.explanation}`);
+    playError();
     shakeCard();
   }
 
@@ -2487,6 +2633,11 @@ function showFeedback(isCorrect, text) {
   box.className = `feedback-box visible ${isCorrect ? 'correct' : 'wrong'}`;
   icon.textContent = isCorrect ? '✅' : '❌';
   msg.innerHTML = text;
+
+  if (voiceEnabled) {
+    const toSpeak = isCorrect ? 'Muito bem! Você acertou!' : 'Ops! ' + stripHtml(text).replace(/^Ops!\s*/,'');
+    setTimeout(() => speak(toSpeak), 300);
+  }
 }
 
 function shakeCard() {
