@@ -958,9 +958,9 @@ const TOPICS = [
       {
         type: 'mc',
         question: '"Vocês trouxeram ___ mochilas hoje?"',
-        options: ['minhas', 'nossas', 'suas', 'meu'],
+        options: ['minhas', 'nossas', 'suas', 'vossas'],
         correct: 2,
-        explanation: '"Suas" é o pronome possessivo para vocês (2ª pessoa do plural). Como estamos falando das mochilas de vocês, usamos "suas".'
+        explanation: '"Suas" é o pronome possessivo para vocês (2ª pessoa do plural) no português do Brasil. Como estamos falando das mochilas de vocês, usamos "suas".'
       },
       {
         type: 'mc',
@@ -1941,7 +1941,7 @@ const TOPICS = [
       },
       {
         type: 'mc',
-        question: 'Qual frase usa a pontuação CORRETAMENTE?',
+        question: 'Você quer fazer UMA PERGUNTA ao seu amigo. Qual dessas frases usa a pontuação CORRETA?',
         options: [
           'Você gosta de sorvete.',
           'Você gosta de sorvete,',
@@ -1949,7 +1949,7 @@ const TOPICS = [
           'Você gosta de sorvete!'
         ],
         correct: 2,
-        explanation: '"Você gosta de sorvete?" está correto! É uma pergunta, então termina com ponto de interrogação (?). O ponto final seria para afirmações, e ! para exclamações.'
+        explanation: '"Você gosta de sorvete?" está correto! Como é uma pergunta, termina com ponto de interrogação (?). O ponto final (.) é para afirmações, e o ponto de exclamação (!) para emoção ou surpresa.'
       },
       {
         type: 'mc',
@@ -2672,7 +2672,7 @@ function checkMC(selectedIndex) {
   if (answered) return;
   answered = true;
 
-  const ex = TOPICS[currentTopicIndex].exercises[currentExerciseIndex];
+  const ex = sessionExercises[currentExerciseIndex];
   const isCorrect = selectedIndex === ex.correct;
 
   const btns = document.querySelectorAll('.option-btn');
@@ -2707,7 +2707,7 @@ function checkFill() {
   if (!userAnswer) return;
 
   answered = true;
-  const ex = TOPICS[currentTopicIndex].exercises[currentExerciseIndex];
+  const ex = sessionExercises[currentExerciseIndex];
 
   let isCorrect = false;
   const accepted = Array.isArray(ex.accepted) ? ex.accepted : [ex.correct];
