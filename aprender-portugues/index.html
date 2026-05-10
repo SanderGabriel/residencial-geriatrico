@@ -676,6 +676,75 @@ body {
 /* ===== UTILITÁRIOS ===== */
 .color-bar { height: 6px; border-radius: var(--radius) var(--radius) 0 0; display: block; width: 100%; }
 
+/* ===== MODO PROVA ===== */
+.btn-prova {
+  width: 100%;
+  max-width: 900px;
+  background: linear-gradient(135deg, #FFD166, #F9A825);
+  color: #2D2D2D;
+  border: none;
+  border-radius: 20px;
+  padding: 20px 32px;
+  font-size: 1.15rem;
+  font-weight: 900;
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 20px rgba(249,168,37,0.45);
+  transition: transform 0.15s, box-shadow 0.15s;
+  margin-bottom: 16px;
+  letter-spacing: var(--letter-s);
+}
+.btn-prova:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(249,168,37,0.55); }
+.btn-prova:active { transform: scale(0.98); }
+.btn-prova small { font-size: 0.85rem; font-weight: 600; opacity: 0.65; }
+
+.prova-topic-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #F0F4FF;
+  border-radius: 30px;
+  padding: 5px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 10px;
+}
+
+.prova-breakdown {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.prova-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.22);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+.prova-row.correct { border-left: 4px solid #2ECC71; }
+.prova-row.wrong { border-left: 4px solid #E74C3C; }
+
+.nota-box {
+  font-size: 3.5rem;
+  font-weight: 900;
+  display: block;
+  line-height: 1;
+}
+.nota-label { font-size: 1rem; opacity: 0.9; margin-top: 4px; display: block; }
+
 /* ===== TOGGLES DE SOM/VOZ ===== */
 .home-toggles {
   display: flex;
@@ -746,6 +815,10 @@ body {
       <button onclick="resetProgress()" class="toggle-btn">🔄 Zerar</button>
     </div>
   </div>
+  <button class="btn-prova" onclick="startProva()">
+    🏆 Modo Prova Geral
+    <small>10 questões · 1 de cada tema · com nota final</small>
+  </button>
   <div class="topics-grid" id="topics-grid"></div>
 </div>
 
@@ -790,14 +863,15 @@ body {
   <div class="result-mascot" id="result-mascot">🦋</div>
   <h1 class="result-title" id="result-title">Parabéns!</h1>
   <p class="result-subtitle" id="result-subtitle"></p>
-  <div class="result-score-box">
+  <div class="result-score-box" id="result-score-box">
     <span class="result-score-number" id="result-score"></span>
     <span class="result-score-label" id="result-score-label"></span>
     <div class="result-stars" id="result-stars"></div>
   </div>
+  <div class="prova-breakdown" id="prova-breakdown" style="display:none"></div>
   <div class="result-buttons">
-    <button class="btn-white" onclick="restartTopic()">🔄 Tentar de novo</button>
-    <button class="btn-ghost" onclick="goHome()">🏠 Escolher outro tema</button>
+    <button class="btn-white" id="btn-restart" onclick="restartTopic()">🔄 Tentar de novo</button>
+    <button class="btn-ghost" onclick="goHome()">🏠 Menu principal</button>
   </div>
 </div>
 
@@ -2280,6 +2354,8 @@ let score = 0;
 let answered = false;
 let totalStars = 0;
 let topicStars = {};
+let provaMode = false;
+let provaTopicResults = [];
 
 /* ===================================================
    INICIALIZAÇÃO
@@ -2478,6 +2554,7 @@ function openTopic(index) {
 }
 
 function startExercises() {
+  provaMode = false;
   currentExerciseIndex = 0;
   score = 0;
   sessionExercises = selectRandomExercises(TOPICS[currentTopicIndex]);
@@ -2485,8 +2562,35 @@ function startExercises() {
   showScreen('exercises');
 }
 
+function startProva() {
+  provaMode = true;
+  provaTopicResults = [];
+  currentExerciseIndex = 0;
+  score = 0;
+  // 1 questão aleatória (com opções embaralhadas) de cada tema
+  sessionExercises = TOPICS.map(topic => {
+    const pool = [...topic.exercises];
+    const picked = pool[Math.floor(Math.random() * pool.length)];
+    if (picked.type !== 'mc') return { ...picked, _topicIcon: topic.icon, _topicTitle: topic.title, _topicColor: topic.color };
+    const correct = picked.options[picked.correct];
+    const opts = [...picked.options];
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    return { ...picked, options: opts, correct: opts.indexOf(correct), _topicIcon: topic.icon, _topicTitle: topic.title, _topicColor: topic.color };
+  });
+  renderExercise();
+  showScreen('exercises');
+}
+
+function recordProvaResult(isCorrect) {
+  const ex = sessionExercises[currentExerciseIndex];
+  provaTopicResults.push({ icon: ex._topicIcon, title: ex._topicTitle, correct: isCorrect });
+}
+
 function restartTopic() {
-  startExercises();
+  if (provaMode) { startProva(); } else { startExercises(); }
 }
 
 /* ===================================================
@@ -2498,15 +2602,21 @@ function renderExercise() {
   const ex = exercises[currentExerciseIndex];
   const total = exercises.length;
 
-  document.getElementById('ex-topic-name').textContent = `${topic.icon} ${topic.title}`;
+  const exTopicIcon = provaMode ? '🏆' : topic.icon;
+  const exTopicName = provaMode ? 'Prova Geral' : topic.title;
+  document.getElementById('ex-topic-name').textContent = `${exTopicIcon} ${exTopicName}`;
   document.getElementById('ex-progress-text').textContent = `${currentExerciseIndex + 1} de ${total}`;
   document.getElementById('ex-progress-bar').style.width = `${(currentExerciseIndex / total) * 100}%`;
 
   answered = false;
 
   const qText = ex.question;
+  const provaBadge = (provaMode && ex._topicIcon)
+    ? `<div class="prova-topic-badge">${ex._topicIcon} ${ex._topicTitle}</div>`
+    : '';
   let exHTML = `
     <div class="exercise-card" id="exercise-card">
+      ${provaBadge}
       <div class="exercise-number">Questão ${currentExerciseIndex + 1} de ${total}</div>
       <div class="exercise-question">
         ${qText.replace(/\n/g, '<br>')}
@@ -2584,6 +2694,7 @@ function checkMC(selectedIndex) {
     playError();
     shakeCard();
   }
+  if (provaMode) recordProvaResult(isCorrect);
 
   showNextButton();
 }
@@ -2621,6 +2732,7 @@ function checkFill() {
     playError();
     shakeCard();
   }
+  if (provaMode) recordProvaResult(isCorrect);
 
   showNextButton();
 }
@@ -2671,39 +2783,72 @@ function nextExercise() {
    RESULTADO
    =================================================== */
 function showResults() {
-  const topic = TOPICS[currentTopicIndex];
   const total = sessionExercises.length;
   const pct = Math.round((score / total) * 100);
-  const earned = Math.min(score, 5);
 
-  // Calcular estrelas para este tópico
-  const prevStars = topicStars[topic.id] || 0;
-  if (earned > prevStars) {
-    const diff = earned - prevStars;
-    totalStars += diff;
-    topicStars[topic.id] = earned;
-    saveProgress();
-  }
+  // Esconder/mostrar breakdown
+  const breakdown = document.getElementById('prova-breakdown');
+  const starsEl = document.getElementById('result-stars');
+  const restartBtn = document.getElementById('btn-restart');
 
-  let mascot, title, subtitle;
-  if (pct === 100) {
-    mascot = '🏆'; title = 'Perfeito!'; subtitle = 'Você é incrível! Zerou a fase! 🎉';
-  } else if (pct >= 80) {
-    mascot = '🌟'; title = 'Muito bem!'; subtitle = 'Você foi ótima! Quase lá! 💪';
-  } else if (pct >= 60) {
-    mascot = '😊'; title = 'Boa tentativa!'; subtitle = 'Está indo bem! Que tal tentar de novo?';
+  if (provaMode) {
+    // ---- MODO PROVA ----
+    const nota = pct >= 95 ? 10 : pct >= 85 ? 9 : pct >= 75 ? 8 : pct >= 65 ? 7 : pct >= 55 ? 6 : pct >= 45 ? 5 : 4;
+    let mascot, title, subtitle;
+    if (nota >= 9) { mascot = '🏆'; title = `Nota ${nota}!`; subtitle = 'Incrível! Você arrasou na prova! 🎉'; }
+    else if (nota >= 7) { mascot = '🌟'; title = `Nota ${nota}!`; subtitle = 'Muito bem! Continue assim! 💪'; }
+    else if (nota >= 6) { mascot = '😊'; title = `Nota ${nota}!`; subtitle = 'Boa! Revise os temas que erraste.'; }
+    else { mascot = '📚'; title = `Nota ${nota}`; subtitle = 'Estude mais e tente de novo! Você consegue! 🌈'; }
+
+    document.getElementById('result-mascot').textContent = mascot;
+    document.getElementById('result-title').textContent = title;
+    document.getElementById('result-subtitle').textContent = subtitle;
+    document.getElementById('result-score').textContent = `${score}/${total}`;
+    document.getElementById('result-score-label').textContent = `questões certas (${pct}%)`;
+    starsEl.textContent = '';
+
+    // Gabarito por tema
+    breakdown.style.display = 'flex';
+    breakdown.innerHTML = provaTopicResults.map(r => `
+      <div class="prova-row ${r.correct ? 'correct' : 'wrong'}">
+        <span>${r.icon} ${r.title}</span>
+        <span>${r.correct ? '✅ Acertou' : '❌ Errou'}</span>
+      </div>
+    `).join('');
+
+    restartBtn.textContent = '🔄 Repetir prova';
+    if (nota >= 7) bigCelebrate();
+    if (voiceEnabled) setTimeout(() => speak(`${title} Você acertou ${score} de ${total} questões.`), 400);
+
   } else {
-    mascot = '💪'; title = 'Continue tentando!'; subtitle = 'Não desista! Você consegue! 🌈';
+    // ---- MODO TEMA ----
+    const topic = TOPICS[currentTopicIndex];
+    const earned = Math.min(score, 5);
+    const prevStars = topicStars[topic.id] || 0;
+    if (earned > prevStars) {
+      totalStars += earned - prevStars;
+      topicStars[topic.id] = earned;
+      saveProgress();
+    }
+
+    let mascot, title, subtitle;
+    if (pct === 100) { mascot = '🏆'; title = 'Perfeito!'; subtitle = 'Você é incrível! Zerou a fase! 🎉'; }
+    else if (pct >= 80) { mascot = '🌟'; title = 'Muito bem!'; subtitle = 'Você foi ótima! Quase lá! 💪'; }
+    else if (pct >= 60) { mascot = '😊'; title = 'Boa tentativa!'; subtitle = 'Está indo bem! Que tal tentar de novo?'; }
+    else { mascot = '💪'; title = 'Continue tentando!'; subtitle = 'Não desista! Você consegue! 🌈'; }
+
+    document.getElementById('result-mascot').textContent = mascot;
+    document.getElementById('result-title').textContent = title;
+    document.getElementById('result-subtitle').textContent = subtitle;
+    document.getElementById('result-score').textContent = `${score}/${total}`;
+    document.getElementById('result-score-label').textContent = `questões certas (${pct}%)`;
+    starsEl.textContent = '⭐'.repeat(earned) + '☆'.repeat(5 - earned);
+    breakdown.style.display = 'none';
+    restartBtn.textContent = '🔄 Tentar de novo';
+
+    if (pct >= 80) bigCelebrate();
+    if (voiceEnabled) setTimeout(() => speak(`${title} ${subtitle}`), 400);
   }
-
-  document.getElementById('result-mascot').textContent = mascot;
-  document.getElementById('result-title').textContent = title;
-  document.getElementById('result-subtitle').textContent = subtitle;
-  document.getElementById('result-score').textContent = `${score}/${total}`;
-  document.getElementById('result-score-label').textContent = `questões certas (${pct}%)`;
-  document.getElementById('result-stars').textContent = '⭐'.repeat(earned) + '☆'.repeat(5 - earned);
-
-  if (pct >= 80) bigCelebrate();
 
   showScreen('results');
 }
