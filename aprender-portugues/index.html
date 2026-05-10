@@ -701,6 +701,7 @@ body {
     <h1 class="home-title">Aprender com a Luna!</h1>
     <p class="home-subtitle">Escolha um tema para estudar e se divertir 🎉</p>
     <div class="stars-counter" id="total-stars-display">⭐ 0 estrelas ganhas</div>
+    <button onclick="resetProgress()" style="background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.4);color:white;border-radius:30px;padding:7px 20px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif;margin-bottom:8px;">🔄 Zerar progresso</button>
   </div>
   <div class="topics-grid" id="topics-grid"></div>
 </div>
@@ -843,6 +844,46 @@ const TOPICS = [
         options: ['minhas', 'nossas', 'suas', 'meu'],
         correct: 2,
         explanation: '"Suas" é o pronome possessivo para vocês (2ª pessoa do plural). Como estamos falando das mochilas de vocês, usamos "suas".'
+      },
+      {
+        type: 'mc',
+        question: '"Ela trouxe ___ boneca favorita para a escola."',
+        options: ['minha', 'sua', 'nossa', 'tua'],
+        correct: 1,
+        explanation: '"Sua" indica posse da 3ª pessoa (ela). Como a boneca pertence a ela, usamos "sua boneca".'
+      },
+      {
+        type: 'mc',
+        question: '"Nós esquecemos ___ lanche em casa."',
+        options: ['meu', 'seu', 'nosso', 'vosso'],
+        correct: 2,
+        explanation: '"Nosso" é o pronome possessivo da 1ª pessoa do plural (nós). O lanche pertence a nós juntos!'
+      },
+      {
+        type: 'mc',
+        question: 'Qual frase usa pronome possessivo CORRETAMENTE?',
+        options: [
+          'Ela foi na minha escola dela.',
+          'Este é meu livro.',
+          'Nós fomos na nossa casa nossa.',
+          'Tu trouxeste o teu meu caderno.'
+        ],
+        correct: 1,
+        explanation: '"Este é meu livro." usa "meu" corretamente — indica que o livro pertence a mim. As outras frases repetem o pronome desnecessariamente.'
+      },
+      {
+        type: 'mc',
+        question: '"Os meninos lavaram ___ mãos antes de comer."',
+        options: ['minhas', 'nossas', 'suas', 'tuas'],
+        correct: 2,
+        explanation: '"Suas" é usado para a 3ª pessoa do plural (eles). As mãos pertencem aos meninos, então usamos "suas mãos".'
+      },
+      {
+        type: 'mc',
+        question: '"Tu perdeste ___ chave novamente?"',
+        options: ['minha', 'tua', 'sua', 'nossa'],
+        correct: 1,
+        explanation: '"Tua" é o pronome possessivo da 2ª pessoa do singular (tu). Quando falamos com alguém diretamente usando "tu", a posse é "tua/teu".'
       }
     ]
   },
@@ -953,6 +994,61 @@ const TOPICS = [
         ],
         correct: 2,
         explanation: '"Você" é usado com amigos, colegas e pessoas próximas em conversas informais. Para autoridades e pessoas que merecem reverência, usamos pronomes formais!'
+      },
+      {
+        type: 'mc',
+        question: 'Em uma carta para o diretor da escola, como você começa?',
+        options: [
+          '"Oi diretor, tudo bem?"',
+          '"Prezado Senhor Diretor,"',
+          '"E aí, chefe!"',
+          '"Olá você aí!"'
+        ],
+        correct: 1,
+        explanation: 'Em cartas formais para diretores, usamos "Prezado Senhor Diretor" ou "Ilmo. Sr. Diretor". Mostra respeito e educação!'
+      },
+      {
+        type: 'mc',
+        question: 'Uma senhora idosa entrou no ônibus. Você fala:',
+        options: [
+          '"Ei vovó, senta aqui!"',
+          '"A senhora pode sentar no meu lugar."',
+          '"Você quer meu lugar?"',
+          '"Toma o lugar, tia!"'
+        ],
+        correct: 1,
+        explanation: '"A senhora" é o pronome de tratamento correto para mulheres mais velhas ou que merecem respeito. Mostra educação e consideração!'
+      },
+      {
+        type: 'mc',
+        question: 'Qual frase usa pronome de tratamento INCORRETAMENTE?',
+        options: [
+          '"O senhor pode me ajudar?"',
+          '"A senhora está bem?"',
+          '"Vossa Excelência, assine aqui, você."',
+          '"Prezado professor, tenho uma dúvida."'
+        ],
+        correct: 2,
+        explanation: 'Misturar "Vossa Excelência" com "você" na mesma frase está errado! Quando usamos pronome de tratamento formal, mantemos a formalidade até o fim.'
+      },
+      {
+        type: 'mc',
+        question: 'Para falar com um médico desconhecido, o correto é:',
+        options: [
+          '"Ei doutor, me diz o que tenho!"',
+          '"Doutor, o senhor pode me examinar?"',
+          '"Você aí, doutor, me ajuda!"',
+          '"Fala logo, doutor!"'
+        ],
+        correct: 1,
+        explanation: 'Para médicos e profissionais, usamos o título (Doutor) mais "o senhor/a senhora". É uma forma respeitosa e adequada de se comunicar!'
+      },
+      {
+        type: 'mc',
+        question: 'Qual pronome de tratamento usamos para falar com o Papa?',
+        options: ['Vossa Excelência', 'Vossa Majestade', 'Vossa Santidade', 'Você'],
+        correct: 2,
+        explanation: '"Vossa Santidade" é o pronome correto para o Papa. "Vossa Majestade" é para reis/rainhas, e "Vossa Excelência" para autoridades políticas.'
       }
     ]
   },
@@ -1049,6 +1145,46 @@ const TOPICS = [
         ],
         correct: 1,
         explanation: '"Ela tem mais bonecas que eu." está correto! Aqui "mais" indica quantidade/comparação. As outras frases deveriam usar "mas" (porém).'
+      },
+      {
+        type: 'mc',
+        question: '"Minha irmã é pequena, ___ muito esperta!"',
+        options: ['mas', 'mais'],
+        correct: 0,
+        explanation: 'Temos contraste: ela é pequena, MAS (porém) é esperta. Posso trocar por "porém" e funciona. Confirmado: é MAS!'
+      },
+      {
+        type: 'mc',
+        question: '"Preciso de ___ tempo para terminar o dever."',
+        options: ['mas', 'mais'],
+        correct: 1,
+        explanation: '"Mais" indica quantidade (mais tempo = uma quantidade maior de tempo). Posso dizer "menos tempo" e faz sentido. É MAIS!'
+      },
+      {
+        type: 'mc',
+        question: '"Tentei dormir, ___ não consegui."',
+        options: ['mas', 'mais'],
+        correct: 0,
+        explanation: 'Há contraste: tentei dormir, MAS (porém) não consegui. Substituindo por "porém": "Tentei dormir, porém não consegui." Funciona! É MAS.'
+      },
+      {
+        type: 'mc',
+        question: 'Em qual frase "mas" está ERRADO?',
+        options: [
+          '"Queria ir, mas estava chovendo."',
+          '"Ela é bonita, mas antipática."',
+          '"Quero mas sorvete!"',
+          '"Tentei, mas não deu."'
+        ],
+        correct: 2,
+        explanation: '"Quero mas sorvete!" está errado! "Mais sorvete" (quantidade). "Mas" é para contraste (porém). Sempre teste: posso trocar por "porém"? Se não, é MAIS!'
+      },
+      {
+        type: 'mc',
+        question: '"Ela é ___ alta que a irmã."',
+        options: ['mas', 'mais'],
+        correct: 1,
+        explanation: '"Mais" é usado em comparações (mais alto, mais bonito, mais rápido). Aqui comparamos alturas: ela é mais alta. É MAIS!'
       }
     ]
   },
@@ -1145,6 +1281,46 @@ const TOPICS = [
         options: ['CH (como em chave)', 'Z (como em zebra)', 'KS (como em táxi)', 'S (como em sapo)'],
         correct: 0,
         explanation: 'Em "enxame", o X tem som de CH! Pronunciamos "enchame". Palavras com "en" antes do X geralmente têm som de CH: enxada, enxuto, enxoval.'
+      },
+      {
+        type: 'mc',
+        question: 'Na palavra "xarope", a letra X tem o som de:',
+        options: ['CH (como em chave)', 'Z (como em zebra)', 'KS (como em táxi)', 'S (como em sapo)'],
+        correct: 0,
+        explanation: 'Em "xarope", o X tem som de CH! Pronunciamos "charope". Palavras iniciadas com X geralmente têm som de CH.'
+      },
+      {
+        type: 'mc',
+        question: 'Na palavra "exemplo", a letra X tem o som de:',
+        options: ['CH (como em chave)', 'Z (como em zebra)', 'KS (como em táxi)', 'S (como em sapo)'],
+        correct: 1,
+        explanation: 'Em "exemplo", o X tem som de Z! Pronunciamos "ezemplo". Quando X vem após "e" inicial, geralmente tem som de Z.'
+      },
+      {
+        type: 'mc',
+        question: 'Qual palavra tem X com som de KS?',
+        options: ['xícara', 'exame', 'fixo', 'próximo'],
+        correct: 2,
+        explanation: '"Fixo" tem X com som de KS! Pronunciamos "fikso". Outros exemplos: táxi (táksi), tórax (tóraks).'
+      },
+      {
+        type: 'mc',
+        question: 'Na palavra "enxoval", o X tem som de:',
+        options: ['CH (como em chave)', 'Z (como em zebra)', 'KS (como em táxi)', 'S (como em sapo)'],
+        correct: 0,
+        explanation: 'Em "enxoval", o X tem som de CH! Como em "enxame", palavras com "en" antes do X têm som de CH. Pronunciamos "enchoval".'
+      },
+      {
+        type: 'mc',
+        question: 'Qual par de palavras tem X com o MESMO som?',
+        options: [
+          'xícara e exame',
+          'táxi e fixo',
+          'máximo e exemplo',
+          'xale e táxi'
+        ],
+        correct: 1,
+        explanation: '"Táxi" e "fixo" têm X com som de KS! Táxi = táksi, fixo = fikso. Os outros pares têm sons diferentes de X.'
       }
     ]
   },
@@ -1236,6 +1412,46 @@ const TOPICS = [
         options: ['terminar', 'iniciar', 'parar', 'acabar'],
         correct: 1,
         explanation: '"Iniciar" é sinônimo de "começar"! Os dois indicam o início de algo. "Terminar", "parar" e "acabar" são antônimos (significado oposto).'
+      },
+      {
+        type: 'mc',
+        question: 'Qual é um sinônimo de "grande"?',
+        options: ['pequeno', 'minúsculo', 'imenso', 'curto'],
+        correct: 2,
+        explanation: '"Imenso" é um sinônimo de "grande"! Os dois indicam algo de tamanho muito grande. Outros sinônimos: enorme, gigante, vasto.'
+      },
+      {
+        type: 'mc',
+        question: '"O menino ficou assustado com o barulho." Qual sinônimo substitui "assustado"?',
+        options: ['corajoso', 'alegre', 'com medo', 'satisfeito'],
+        correct: 2,
+        explanation: '"Com medo" tem significado muito parecido com "assustado"! Outros sinônimos: apavorado, amedrontado, aterrorizado.'
+      },
+      {
+        type: 'mc',
+        question: 'Qual é um sinônimo de "dizer"?',
+        options: ['calar', 'falar', 'ouvir', 'escutar'],
+        correct: 1,
+        explanation: '"Falar" é um sinônimo de "dizer"! Os dois indicam a ação de comunicar algo com palavras. Outros sinônimos: afirmar, declarar, expressar.'
+      },
+      {
+        type: 'mc',
+        question: '"O filme foi muito divertido." Qual sinônimo pode substituir "divertido"?',
+        options: ['chato', 'triste', 'engraçado', 'difícil'],
+        correct: 2,
+        explanation: '"Engraçado" é um sinônimo de "divertido"! Outros sinônimos: animado, prazeroso, alegre. Os antônimos seriam: chato, triste, tedioso.'
+      },
+      {
+        type: 'mc',
+        question: 'Qual par de palavras NÃO são sinônimos?',
+        options: [
+          'bonito / lindo',
+          'rápido / veloz',
+          'feliz / triste',
+          'casa / lar'
+        ],
+        correct: 2,
+        explanation: '"Feliz" e "triste" são ANTÔNIMOS (significados opostos), não sinônimos! Sinônimos de feliz: alegre, contente. Sinônimos de triste: melancólico, abatido.'
       }
     ]
   },
@@ -1329,6 +1545,46 @@ const TOPICS = [
         options: ['discrição', 'descrição'],
         correct: 1,
         explanation: '"Descrição" = ato de descrever, contar como algo é! A professora quer que você descreva o personagem. "Discrição" significa ser reservado, discreto.'
+      },
+      {
+        type: 'mc',
+        question: '"O ___ do deputado termina em dois anos." (período no cargo)',
+        options: ['mandado', 'mandato'],
+        correct: 1,
+        explanation: '"Mandato" = período no cargo (do deputado, prefeito, presidente). "Mandado" = ordem judicial (mandado de prisão, mandado de busca).'
+      },
+      {
+        type: 'mc',
+        question: '"O policial apresentou o ___ de prisão." (ordem judicial)',
+        options: ['mandato', 'mandado'],
+        correct: 1,
+        explanation: '"Mandado" = ordem judicial expedida por um juiz. "Mandato" = período de exercício num cargo político. Palavras parecidas, significados bem diferentes!'
+      },
+      {
+        type: 'mc',
+        question: 'Qual par NÃO são parônimas?',
+        options: [
+          'acender / ascender',
+          'descrição / discrição',
+          'feliz / alegre',
+          'comprimento / cumprimento'
+        ],
+        correct: 2,
+        explanation: '"Feliz" e "alegre" são SINÔNIMOS (mesmo significado), não parônimas! Parônimas são palavras parecidas na escrita mas com significados diferentes.'
+      },
+      {
+        type: 'mc',
+        question: '"Ela agiu com muita ___ e não comentou o segredo de ninguém." (ser discreta)',
+        options: ['descrição', 'discrição'],
+        correct: 1,
+        explanation: '"Discrição" = qualidade de ser discreto, reservado, não contar segredos. "Descrição" = ato de descrever, contar como algo é.'
+      },
+      {
+        type: 'mc',
+        question: '"O ___ da piscina olímpica é de 50 metros." (tamanho)',
+        options: ['cumprimento', 'comprimento'],
+        correct: 1,
+        explanation: '"Comprimento" = tamanho, extensão (medimos o comprimento com régua ou fita métrica). "Cumprimento" = saudação (oi, tchau, abraço).'
       }
     ]
   },
@@ -1430,6 +1686,51 @@ const TOPICS = [
         ],
         correct: 3,
         explanation: '"Coral" é uma palavra homônima! Pode ser o grupo de cantores (coral de vozes) OU o animal marinho colorido (coral do mar). Mesma palavra, dois mundos diferentes!'
+      },
+      {
+        type: 'mc',
+        question: '"Folha" pode significar:',
+        options: [
+          'Apenas folha de árvore',
+          'Apenas folha de papel',
+          'Folha de árvore E folha de papel',
+          'Um animal'
+        ],
+        correct: 2,
+        explanation: '"Folha" é uma palavra homônima! Pode ser a folha verde da árvore OU a folha branca de papel para escrever. Mesma palavra, dois significados!'
+      },
+      {
+        type: 'mc',
+        question: '"O banco está fechado." e "Sentei no banco do parque." A palavra "banco" é:',
+        options: ['Sinônima', 'Parônima', 'Homônima', 'Antônima'],
+        correct: 2,
+        explanation: '"Banco" é homônima! Pode ser a instituição financeira OU o assento de madeira no parque. Mesma escrita e pronúncia, significados completamente diferentes!'
+      },
+      {
+        type: 'mc',
+        question: '"Caro professor" e "Este celular é muito caro." A palavra "caro" é:',
+        options: ['Sinônima nas duas frases', 'Parônima', 'Homônima: querido / de alto preço', 'Antônima'],
+        correct: 2,
+        explanation: '"Caro" é homônima! Na 1ª frase: caro = querido, estimado. Na 2ª frase: caro = de preço alto. Mesma palavra, significados bem diferentes!'
+      },
+      {
+        type: 'mc',
+        question: 'Qual palavra NÃO é homônima (tem apenas um significado principal)?',
+        options: ['banco', 'manga', 'caderno', 'canto'],
+        correct: 2,
+        explanation: '"Caderno" tem apenas um significado principal: o objeto para escrever. Banco, manga e canto são homônimas — cada uma tem dois ou mais significados diferentes!'
+      },
+      {
+        type: 'mc',
+        question: 'Homônimas são palavras que:',
+        options: [
+          'Têm significados opostos',
+          'Têm o mesmo significado',
+          'São parecidas na escrita mas com significados diferentes',
+          'Têm a mesma escrita/som mas significados diferentes'
+        ],
+        correct: 3,
+        explanation: 'Homônimas têm a mesma escrita e/ou som, mas significados completamente diferentes! Como "manga" (fruta) e "manga" (parte da camisa).'
       }
     ]
   },
@@ -1532,6 +1833,61 @@ const TOPICS = [
         ],
         correct: 2,
         explanation: '"Você gosta de sorvete?" está correto! É uma pergunta, então termina com ponto de interrogação (?). O ponto final seria para afirmações, e ! para exclamações.'
+      },
+      {
+        type: 'mc',
+        question: '"Querida Ana, Como vai você?" A vírgula após "Ana" serve para:',
+        options: [
+          'Separar itens de uma lista',
+          'Indicar pausa após o nome de quem se fala',
+          'Substituir o ponto final',
+          'Indicar surpresa'
+        ],
+        correct: 1,
+        explanation: 'A vírgula após o nome de quem você chama (vocativo) indica pausa! "Querida Ana," → Ana é quem recebe a carta. Outros exemplos: "João, venha aqui!" / "Professora, tenho uma dúvida."'
+      },
+      {
+        type: 'mc',
+        question: '"Maria (minha melhor amiga) me ajudou." Os parênteses servem para:',
+        options: [
+          'Fazer uma pergunta',
+          'Indicar emoção forte',
+          'Inserir uma informação adicional',
+          'Separar parágrafos'
+        ],
+        correct: 2,
+        explanation: 'Os parênteses ( ) inserem explicações extras que não são essenciais para a frase principal. Podemos retirar a informação entre parênteses e a frase continua fazendo sentido!'
+      },
+      {
+        type: 'mc',
+        question: 'Qual pontuação completa: "Que surpresa maravilhosa ___"',
+        options: ['.', '?', '!', ';'],
+        correct: 2,
+        explanation: 'O ponto de exclamação (!) expressa emoção forte, surpresa, alegria! "Que surpresa maravilhosa!" — é uma exclamação, não uma pergunta.'
+      },
+      {
+        type: 'mc',
+        question: '"Preciso estudar; amanhã é a prova." O ponto e vírgula (;) indica:',
+        options: [
+          'Uma pergunta',
+          'Uma pausa maior que vírgula, menor que ponto',
+          'O fim do texto',
+          'Uma exclamação'
+        ],
+        correct: 1,
+        explanation: 'O ponto e vírgula (;) faz uma pausa média: maior que a vírgula, mas menor que o ponto final. Liga ideias relacionadas que poderiam ser frases separadas.'
+      },
+      {
+        type: 'mc',
+        question: 'Qual frase tem pontuação ERRADA?',
+        options: [
+          '"Ela foi ao mercado."',
+          '"Você quer sorvete?"',
+          '"Que dia lindo?"',
+          '"Comprei: pão, leite e manteiga."'
+        ],
+        correct: 2,
+        explanation: '"Que dia lindo?" está errado! Não é uma pergunta — é uma exclamação de admiração. O correto seria "Que dia lindo!" com ponto de exclamação.'
       }
     ]
   },
@@ -1645,6 +2001,56 @@ const TOPICS = [
         options: ['Proteja', 'Protegeu', 'Vai proteger', 'Protegia'],
         correct: 0,
         explanation: '"Proteja" está no imperativo! É um apelo, um chamado à ação. Cartazes, anúncios e campanhas usam muito o imperativo para motivar as pessoas!'
+      },
+      {
+        type: 'mc',
+        question: 'Qual frase tem um verbo de comando?',
+        options: [
+          '"Ela correu muito ontem."',
+          '"Amanhã vou à escola."',
+          '"Não esqueça o casaco!"',
+          '"A prova foi fácil."'
+        ],
+        correct: 2,
+        explanation: '"Não esqueça o casaco!" usa "esqueça" no imperativo (negativo). É um aviso/pedido! As outras frases narram ações passadas ou futuras.'
+      },
+      {
+        type: 'mc',
+        question: '"Leiam o texto com atenção!" O verbo de comando nessa frase é:',
+        options: ['texto', 'atenção', 'leiam', 'com'],
+        correct: 2,
+        explanation: '"Leiam" é o verbo "ler" no imperativo (para vocês). É uma ordem da professora para que todos façam a leitura. Verbos de comando dizem o que fazer!'
+      },
+      {
+        type: 'mc',
+        question: 'Qual é um exemplo de CONSELHO usando verbo de comando?',
+        options: [
+          '"Ela comeu frutas."',
+          '"Sempre coma bem para ser saudável!"',
+          '"Ela vai comer."',
+          '"Ela comia bem."'
+        ],
+        correct: 1,
+        explanation: '"Sempre coma bem para ser saudável!" é um conselho no imperativo. "Coma" está no modo imperativo. Conselhos, ordens e pedidos usam esse modo verbal!'
+      },
+      {
+        type: 'mc',
+        question: 'Em qual lugar NÃO costumamos encontrar verbos de comando?',
+        options: [
+          'Em receitas culinárias ("Misture os ingredientes...")',
+          'Em bulas de remédio ("Tome 1 comprimido...")',
+          'Em diários pessoais ("Hoje fui ao parque...")',
+          'Em placas de trânsito ("Pare!", "Ceda a passagem")'
+        ],
+        correct: 2,
+        explanation: 'Diários pessoais contam o que aconteceu — usam o passado ("fui", "vi", "comi"). Verbos de comando aparecem em receitas, bulas, placas, avisos e instruções!'
+      },
+      {
+        type: 'mc',
+        question: 'Transforme em verbo de comando: "você deve estudar mais"',
+        options: ['Estudou mais!', 'Vai estudar.', 'Estude mais!', 'Estudava mais.'],
+        correct: 2,
+        explanation: '"Estude mais!" coloca "estudar" no imperativo. É como dar uma ordem ou conselho direto. O imperativo de "estudar" para você é "estude"!'
       }
     ]
   },
@@ -1761,6 +2167,61 @@ const TOPICS = [
         ],
         correct: 0,
         explanation: 'Perfeito! No discurso direto, reproduzimos as palavras exatas com dois pontos e aspas: A professora disse: "A prova será na sexta-feira." O verbo volta: "seria" → "será".'
+      },
+      {
+        type: 'mc',
+        question: 'Qual frase usa discurso DIRETO?',
+        options: [
+          '"Ela disse que estava cansada."',
+          '"Pedro falou que ia embora."',
+          '"— Estou com sono! — disse ela."',
+          '"Ele respondeu que não sabia."'
+        ],
+        correct: 2,
+        explanation: '"— Estou com sono! — disse ela." usa discurso direto! O travessão (—) marca a fala exata da pessoa. As outras frases usam "que" para introduzir a fala = discurso indireto.'
+      },
+      {
+        type: 'mc',
+        question: '"Pedro disse: \'Quero ir à praia!\'" Em discurso INDIRETO fica:',
+        options: [
+          '"Pedro disse que quer ir à praia."',
+          '"Pedro disse que queria ir à praia."',
+          '"Pedro foi à praia."',
+          '"Pedro perguntou se poderia ir."'
+        ],
+        correct: 1,
+        explanation: '"Pedro disse que queria ir à praia." — no discurso indireto o verbo muda: "quero" → "queria". Também tiramos as aspas e adicionamos "que".'
+      },
+      {
+        type: 'mc',
+        question: 'Em discurso indireto, qual palavra geralmente introduz a fala?',
+        options: ['"mas"', '"porém"', '"que"', '"porque"'],
+        correct: 2,
+        explanation: 'A palavra "que" é usada para introduzir a fala no discurso indireto! "Ela disse QUE estava bem." / "Ele falou QUE viria amanhã."'
+      },
+      {
+        type: 'mc',
+        question: '"Ana disse que estava feliz." Em discurso DIRETO fica:',
+        options: [
+          'Ana disse: "Estava feliz."',
+          'Ana disse: "Estou feliz."',
+          'Ana ficou feliz.',
+          'Ana disse que está feliz.'
+        ],
+        correct: 1,
+        explanation: 'Ana disse: "Estou feliz." — no discurso direto reproduzimos as palavras exatas! O verbo volta ao presente: "estava" → "estou". Usamos dois pontos e aspas.'
+      },
+      {
+        type: 'mc',
+        question: 'Qual é a principal diferença entre discurso direto e indireto?',
+        options: [
+          'O direto tem mais palavras',
+          'O direto reproduz as palavras exatas com aspas/travessão; o indireto usa "que" e adapta',
+          'O indireto tem mais pontuação',
+          'Não há diferença entre eles'
+        ],
+        correct: 1,
+        explanation: 'Direto = palavras EXATAS entre aspas ou com travessão. Indireto = contamos com NOSSAS palavras usando "que", e os verbos mudam. São duas formas de reproduzir o que alguém disse!'
       }
     ]
   }
@@ -1771,6 +2232,7 @@ const TOPICS = [
    =================================================== */
 let currentTopicIndex = 0;
 let currentExerciseIndex = 0;
+let sessionExercises = [];
 let score = 0;
 let answered = false;
 let totalStars = 0;
@@ -1792,6 +2254,37 @@ function init() {
 
 function saveProgress() {
   localStorage.setItem('luna-stars', JSON.stringify({ total: totalStars, topics: topicStars }));
+}
+
+function resetProgress() {
+  if (!confirm('Zerar tudo? As estrelas e o progresso serão apagados. 🔄')) return;
+  totalStars = 0;
+  topicStars = {};
+  localStorage.removeItem('luna-stars');
+  renderTopicGrid();
+  updateStarsDisplay();
+}
+
+function selectRandomExercises(topic) {
+  const pool = topic.exercises.map((ex, i) => ({ ...ex, _origIdx: i }));
+  // Embaralha o pool
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  // Pega as 5 primeiras
+  const selected = pool.slice(0, Math.min(5, pool.length));
+  // Para cada questão de múltipla escolha, embaralha as opções
+  return selected.map(ex => {
+    if (ex.type !== 'mc') return ex;
+    const correct = ex.options[ex.correct];
+    const opts = [...ex.options];
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]];
+    }
+    return { ...ex, options: opts, correct: opts.indexOf(correct) };
+  });
 }
 
 function updateStarsDisplay() {
@@ -1852,6 +2345,7 @@ function openTopic(index) {
 function startExercises() {
   currentExerciseIndex = 0;
   score = 0;
+  sessionExercises = selectRandomExercises(TOPICS[currentTopicIndex]);
   renderExercise();
   showScreen('exercises');
 }
@@ -1865,7 +2359,7 @@ function restartTopic() {
    =================================================== */
 function renderExercise() {
   const topic = TOPICS[currentTopicIndex];
-  const exercises = topic.exercises;
+  const exercises = sessionExercises;
   const ex = exercises[currentExerciseIndex];
   const total = exercises.length;
 
@@ -2007,17 +2501,15 @@ function showNextButton() {
   const btn = document.getElementById('btn-next');
   if (!btn) return;
 
-  const topic = TOPICS[currentTopicIndex];
-  const isLast = currentExerciseIndex === topic.exercises.length - 1;
+  const isLast = currentExerciseIndex === sessionExercises.length - 1;
   btn.textContent = isLast ? '🏆 Ver resultado!' : 'Próxima questão →';
   btn.classList.add('visible');
 }
 
 function nextExercise() {
-  const topic = TOPICS[currentTopicIndex];
   currentExerciseIndex++;
 
-  if (currentExerciseIndex >= topic.exercises.length) {
+  if (currentExerciseIndex >= sessionExercises.length) {
     showResults();
   } else {
     renderExercise();
@@ -2029,7 +2521,7 @@ function nextExercise() {
    =================================================== */
 function showResults() {
   const topic = TOPICS[currentTopicIndex];
-  const total = topic.exercises.length;
+  const total = sessionExercises.length;
   const pct = Math.round((score / total) * 100);
   const earned = Math.min(score, 5);
 
