@@ -1,28 +1,38 @@
-import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
-import type { User } from "../../drizzle/schema";
-import { sdk } from "./sdk";
+import type { Request, Response } from 'express';
+import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
+import { env } from './env';
 
-export type TrpcContext = {
-  req: CreateExpressContextOptions["req"];
-  res: CreateExpressContextOptions["res"];
-  user: User | null;
-};
+export interface SessionUser {
+  id: number;
+  email: string;
+  nome: string | null;
+  role: 'admin' | 'user';
+  unidadeId: number | null;
+}
 
-export async function createContext(
-  opts: CreateExpressContextOptions
-): Promise<TrpcContext> {
-  let user: User | null = null;
+export interface AppContext {
+  req: Request;
+  res: Response;
+  user: SessionUser | null;
+}
 
-  try {
-    user = await sdk.authenticateRequest(opts.req);
-  } catch (error) {
-    // Authentication is optional for public procedures.
-    user = null;
+/**
+ * Cria o contexto de cada request tRPC.
+ * Phase 1: usa mock OAuth quando VITE_MOCK_OAUTH=true. Integração com Manus OAuth
+ * será adicionada em Phase 2 (T5.x).
+ */
+export async function createContext({ req, res }: CreateExpressContextOptions): Promise<AppContext> {
+  let user: SessionUser | null = null;
+
+  if (env.VITE_MOCK_OAUTH) {
+    user = {
+      id: 1,
+      email: 'dev@novo-lar.local',
+      nome: env.OWNER_NAME ?? 'Dev Owner',
+      role: 'admin',
+      unidadeId: null,
+    };
   }
 
-  return {
-    req: opts.req,
-    res: opts.res,
-    user,
-  };
+  return { req, res, user };
 }

@@ -1,56 +1,26 @@
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ErrorBoundary from "./components/ErrorBoundary";
-import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import Receitas from "./pages/Receitas";
-import Despesas from "./pages/Despesas";
-import Relatorios from "./pages/Relatorios";
-import ContasPagar from "./pages/ContasPagar";
-import ContasReceber from "./pages/ContasReceber";
-import Fornecedores from "./pages/Fornecedores";
-import Produtos from "@/pages/Produtos";
-import Estoque from "@/pages/Estoque";
-import Unidades from "@/pages/Unidades";
-import CurvaABC from "@/pages/CurvaABC";
-import ConsumoMedio from "@/pages/ConsumoMedio";
-import AnalisesComparativas from "@/pages/AnalisesComparativas";
-import SugestoesCompra from "@/pages/SugestoesCompra";
-import DetalhesProduto from "@/pages/DetalhesProduto";
-
-function App() {
+export function App() {
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <ThemeProvider defaultTheme="light">
-          <TooltipProvider>
-            <Toaster />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/receitas" element={<Receitas />} />
-              <Route path="/despesas" element={<Despesas />} />
-              <Route path="/produtos" element={<Produtos />} />
-              <Route path="/estoque" element={<Estoque />} />
-              <Route path="/fornecedores" element={<Fornecedores />} />
-              <Route path="/unidades" element={<Unidades />} />
-              <Route path="/relatorios" element={<Relatorios />} />
-              <Route path="/curva-abc" element={<CurvaABC />} />
-              <Route path="/consumo-medio" element={<ConsumoMedio />} />
-              <Route path="/analises-comparativas" element={<AnalisesComparativas />} />
-              <Route path="/sugestoes-compra" element={<SugestoesCompra />} />
-              <Route path="/produtos/:id" element={<DetalhesProduto />} />
-              <Route path="/contas-pagar" element={<ContasPagar />} />
-              <Route path="/contas-receber" element={<ContasReceber />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </TooltipProvider>
-        </ThemeProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900">
+      <main className="max-w-xl text-center p-8">
+        <h1 className="text-3xl font-bold mb-2">Novo Lar Financeiro</h1>
+        <p className="text-slate-600 mb-6">
+          Sistema financeiro do Grupo Novo Lar — Phase 1 (Foundation)
+        </p>
+        <div className="rounded-lg border border-slate-200 bg-white p-6 text-left text-sm space-y-1">
+          <p>
+            <span className="font-semibold">Status:</span> Foundation pronto (schema + seed +
+            skeleton).
+          </p>
+          <p>
+            <span className="font-semibold">Próximo:</span> Parte 2 — routers tRPC (CRUD, rateios,
+            títulos, auditoria).
+          </p>
+          <p>
+            <span className="font-semibold">tRPC health:</span>{' '}
+            <code className="text-slate-700">GET /api/trpc/health</code>
+          </p>
+        </div>
+      </main>
+    </div>
   );
 }
-
-export default App;
-

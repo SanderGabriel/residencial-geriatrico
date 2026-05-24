@@ -1,310 +1,298 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, date, boolean, unique, index } from "drizzle-orm/mysql-core";
+import {
+  mysqlTable,
+  int,
+  varchar,
+  text,
+  boolean,
+  timestamp,
+  decimal,
+  date,
+  mysqlEnum,
+  json,
+  uniqueIndex,
+  index,
+} from 'drizzle-orm/mysql-core';
 
-/**
- * Core user table backing auth flow.
- */
-export const users = mysqlTable("users", {
-  id: int("id").autoincrement().primaryKey(),
-  openId: varchar("openId", { length: 64 }).notNull().unique(),
-  name: text("name"),
-  email: varchar("email", { length: 320 }),
-  loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
-});
+// ---------- Users (OAuth-backed) ----------
+export const users = mysqlTable(
+  'users',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    email: varchar('email', { length: 255 }).notNull().unique(),
+    nome: varchar('nome', { length: 255 }),
+    role: mysqlEnum('role', ['admin', 'user']).notNull().default('user'),
+    unidadeId: int('unidade_id'),
+    ativo: boolean('ativo').notNull().default(true),
+    ultimoAcesso: timestamp('ultimo_acesso'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+  },
+  (t) => [index('idx_users_email').on(t.email), index('idx_users_ativo').on(t.ativo)],
+);
 
-export type User = typeof users.$inferSelect;
-export type InsertUser = typeof users.$inferInsert;
+// ---------- Unidades ----------
+export const unidades = mysqlTable(
+  'unidades',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    nome: varchar('nome', { length: 255 }).notNull(),
+    descricao: text('descricao'),
+    ativa: boolean('ativa').notNull().default(true),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+    createdBy: int('created_by'),
+  },
+  (t) => [
+    uniqueIndex('uq_unidades_nome').on(t.nome),
+    index('idx_unidades_ativa_deleted').on(t.ativa, t.deletedAt),
+  ],
+);
 
-/**
- * Unidades do residencial geriátrico
- */
-export const unidades = mysqlTable("unidades", {
-  id: int("id").autoincrement().primaryKey(),
-  nome: varchar("nome", { length: 255 }).notNull().unique(),
-  descricao: text("descricao"),
-  endereco: varchar("endereco", { length: 255 }),
-  telefone: varchar("telefone", { length: 20 }),
-  ativa: boolean("ativa").default(true).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+// ---------- Categorias (dinâmicas) ----------
+export const categorias = mysqlTable(
+  'categorias',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    nome: varchar('nome', { length: 255 }).notNull(),
+    grupo: varchar('grupo', { length: 100 }).notNull(),
+    natureza: mysqlEnum('natureza', [
+      'Receita',
+      'Custo',
+      'Despesa',
+      'Imposto',
+      'Investimento',
+      'Não Operacional',
+    ]).notNull(),
+    ativa: boolean('ativa').notNull().default(true),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+    createdBy: int('created_by'),
+  },
+  (t) => [
+    index('idx_categorias_grupo').on(t.grupo),
+    index('idx_categorias_natureza').on(t.natureza),
+    index('idx_categorias_ativa_deleted').on(t.ativa, t.deletedAt),
+    index('idx_categorias_nome').on(t.nome),
+  ],
+);
 
+// ---------- Fornecedores ----------
+export const fornecedores = mysqlTable(
+  'fornecedores',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    nome: varchar('nome', { length: 255 }).notNull(),
+    documento: varchar('documento', { length: 20 }),
+    telefone: varchar('telefone', { length: 20 }),
+    email: varchar('email', { length: 255 }),
+    ativa: boolean('ativa').notNull().default(true),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+    createdBy: int('created_by'),
+  },
+  (t) => [
+    index('idx_fornecedores_documento').on(t.documento),
+    index('idx_fornecedores_ativa_deleted').on(t.ativa, t.deletedAt),
+    index('idx_fornecedores_nome').on(t.nome),
+  ],
+);
+
+// ---------- Formas de Pagamento ----------
+export const formasPagamento = mysqlTable(
+  'formas_pagamento',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    nome: varchar('nome', { length: 100 }).notNull(),
+    ativa: boolean('ativa').notNull().default(true),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+    createdBy: int('created_by'),
+  },
+  (t) => [
+    uniqueIndex('uq_formas_pagamento_nome').on(t.nome),
+    index('idx_formas_pagamento_ativa_deleted').on(t.ativa, t.deletedAt),
+  ],
+);
+
+// ---------- Linhas de Margem (dinâmicas) ----------
+export const linhasMargem = mysqlTable(
+  'linhas_margem',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    nome: varchar('nome', { length: 255 }).notNull(),
+    descricao: text('descricao'),
+    requerNomeCustomizado: boolean('requer_nome_customizado').notNull().default(false),
+    ativa: boolean('ativa').notNull().default(true),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+    createdBy: int('created_by'),
+  },
+  (t) => [
+    index('idx_linhas_margem_nome').on(t.nome),
+    index('idx_linhas_margem_ativa_deleted').on(t.ativa, t.deletedAt),
+  ],
+);
+
+// ---------- Movimentações ----------
+export const movimentacoes = mysqlTable(
+  'movimentacoes',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    unidadeId: int('unidade_id')
+      .notNull()
+      .references(() => unidades.id),
+    tipo: mysqlEnum('tipo', ['Entrada', 'Saída']).notNull(),
+    dataCaixa: date('data_caixa', { mode: 'string' }).notNull(),
+    competencia: varchar('competencia', { length: 7 }).notNull(), // MM/AAAA
+    valorTotal: decimal('valor_total', { precision: 12, scale: 2 }).notNull(),
+    desconto: decimal('desconto', { precision: 12, scale: 2 }).notNull().default('0.00'),
+    frete: decimal('frete', { precision: 12, scale: 2 }).notNull().default('0.00'),
+    valorLiquido: decimal('valor_liquido', { precision: 12, scale: 2 }),
+    formaPagamentoId: int('forma_pagamento_id').references(() => formasPagamento.id),
+    fornecedorId: int('fornecedor_id').references(() => fornecedores.id),
+    pagador: varchar('pagador', { length: 255 }),
+    beneficiario: varchar('beneficiario', { length: 255 }),
+    descricao: text('descricao'),
+    linhaMargemId: int('linha_margem_id').references(() => linhasMargem.id),
+    linhaMargemOtherName: varchar('linha_margem_other_name', { length: 255 }),
+    tituloId: int('titulo_id'),
+    isTest: boolean('is_test').notNull().default(false),
+    testBatchId: varchar('test_batch_id', { length: 255 }),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+    createdBy: int('created_by'),
+  },
+  (t) => [
+    index('idx_movimentacoes_unidade').on(t.unidadeId),
+    index('idx_movimentacoes_tipo').on(t.tipo),
+    index('idx_movimentacoes_data_caixa').on(t.dataCaixa),
+    index('idx_movimentacoes_competencia').on(t.competencia),
+    index('idx_movimentacoes_forma_pagamento').on(t.formaPagamentoId),
+    index('idx_movimentacoes_fornecedor').on(t.fornecedorId),
+    index('idx_movimentacoes_titulo').on(t.tituloId),
+    index('idx_movimentacoes_deleted').on(t.deletedAt),
+  ],
+);
+
+// ---------- Rateios ----------
+export const rateios = mysqlTable(
+  'rateios',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    movimentacaoId: int('movimentacao_id')
+      .notNull()
+      .references(() => movimentacoes.id, { onDelete: 'cascade' }),
+    categoriaId: int('categoria_id')
+      .notNull()
+      .references(() => categorias.id),
+    valorBruto: decimal('valor_bruto', { precision: 12, scale: 2 }).notNull(),
+    descontoRateado: decimal('desconto_rateado', { precision: 12, scale: 2 })
+      .notNull()
+      .default('0.00'),
+    freteRateado: decimal('frete_rateado', { precision: 12, scale: 2 }).notNull().default('0.00'),
+    valorLiquidoFinal: decimal('valor_liquido_final', { precision: 12, scale: 2 }),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+  },
+  (t) => [
+    index('idx_rateios_movimentacao').on(t.movimentacaoId),
+    index('idx_rateios_categoria').on(t.categoriaId),
+  ],
+);
+
+// ---------- Títulos ----------
+export const titulos = mysqlTable(
+  'titulos',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    unidadeId: int('unidade_id')
+      .notNull()
+      .references(() => unidades.id),
+    tipo: mysqlEnum('tipo', ['Pagar', 'Receber']).notNull(),
+    fornecedorId: int('fornecedor_id').references(() => fornecedores.id),
+    residenteId: int('residente_id'),
+    descricao: varchar('descricao', { length: 255 }).notNull(),
+    valorTotal: decimal('valor_total', { precision: 12, scale: 2 }).notNull(),
+    desconto: decimal('desconto', { precision: 12, scale: 2 }).notNull().default('0.00'),
+    dataVencimento: date('data_vencimento', { mode: 'string' }).notNull(),
+    competencia: varchar('competencia', { length: 7 }),
+    valorRecebidoAcumulado: decimal('valor_recebido_acumulado', { precision: 12, scale: 2 })
+      .notNull()
+      .default('0.00'),
+    saldoEmAberto: decimal('saldo_em_aberto', { precision: 12, scale: 2 }),
+    status: mysqlEnum('status', [
+      'Previsto',
+      'Parcial',
+      'Pago',
+      'Recebido',
+      'Atrasado',
+      'Cancelado',
+    ])
+      .notNull()
+      .default('Previsto'),
+    linhaMargemId: int('linha_margem_id').references(() => linhasMargem.id),
+    linhaMargemOtherName: varchar('linha_margem_other_name', { length: 255 }),
+    deletedAt: timestamp('deleted_at'),
+    createdAt: timestamp('created_at').notNull().defaultNow(),
+    updatedAt: timestamp('updated_at').notNull().defaultNow().onUpdateNow(),
+    createdBy: int('created_by'),
+  },
+  (t) => [
+    index('idx_titulos_unidade').on(t.unidadeId),
+    index('idx_titulos_tipo').on(t.tipo),
+    index('idx_titulos_vencimento').on(t.dataVencimento),
+    index('idx_titulos_status').on(t.status),
+    index('idx_titulos_deleted').on(t.deletedAt),
+  ],
+);
+
+// ---------- Audit Log ----------
+export const auditLog = mysqlTable(
+  'audit_log',
+  {
+    id: int('id').autoincrement().primaryKey(),
+    tabela: varchar('tabela', { length: 100 }).notNull(),
+    recordId: int('record_id').notNull(),
+    acao: mysqlEnum('acao', ['CREATE', 'UPDATE', 'DELETE']).notNull(),
+    dadosAntes: json('dados_antes'),
+    dadosDepois: json('dados_depois'),
+    usuarioId: int('usuario_id'),
+    usuarioNome: varchar('usuario_nome', { length: 255 }),
+    ipAddress: varchar('ip_address', { length: 45 }),
+    userAgent: text('user_agent'),
+    timestamp: timestamp('timestamp').notNull().defaultNow(),
+  },
+  (t) => [
+    index('idx_audit_tabela_record').on(t.tabela, t.recordId),
+    index('idx_audit_usuario').on(t.usuarioId),
+    index('idx_audit_timestamp').on(t.timestamp),
+  ],
+);
+
+// ---------- Exported types ----------
 export type Unidade = typeof unidades.$inferSelect;
-export type InsertUnidade = typeof unidades.$inferInsert;
-
-/**
- * Categorias de receita
- */
-export const categoriasReceita = mysqlTable("categorias_receita", {
-  id: int("id").autoincrement().primaryKey(),
-  nome: varchar("nome", { length: 100 }).notNull().unique(),
-  descricao: text("descricao"),
-  tipo: mysqlEnum("tipo", ["principal", "acessoria"]).default("acessoria").notNull(),
-  ativa: boolean("ativa").default(true).notNull(),
-  ordem: int("ordem"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type CategoriaReceita = typeof categoriasReceita.$inferSelect;
-export type InsertCategoriaReceita = typeof categoriasReceita.$inferInsert;
-
-/**
- * Categorias de despesa
- */
-export const categoriasDespesa = mysqlTable("categorias_despesa", {
-  id: int("id").autoincrement().primaryKey(),
-  nome: varchar("nome", { length: 100 }).notNull().unique(),
-  descricao: text("descricao"),
-  tipo: mysqlEnum("tipo", ["variavel", "fixo", "investimento", "nao_operacional"]).default("variavel").notNull(),
-  ativa: boolean("ativa").default(true).notNull(),
-  ordem: int("ordem"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type CategoriaDespesa = typeof categoriasDespesa.$inferSelect;
-export type InsertCategoriaDespesa = typeof categoriasDespesa.$inferInsert;
-
-/**
- * Receitas
- */
-export const receitas = mysqlTable("receitas", {
-  id: int("id").autoincrement().primaryKey(),
-  unidadeId: int("unidadeId").notNull(),
-  categoriaId: int("categoriaId").notNull(),
-  descricao: varchar("descricao", { length: 255 }),
-  valor: int("valor").notNull(), // Valor em centavos
-  dataReceita: date("dataReceita", { mode: 'string' }).notNull(),
-  dataVencimento: date("dataVencimento", { mode: 'string' }),
-  observacoes: text("observacoes"),
-  status: mysqlEnum("status", ["pendente", "recebida", "cancelada"]).default("recebida").notNull(),
-  usuarioId: int("usuarioId").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => ({
-  dataReceitaIdx: index("idx_receitas_data").on(table.dataReceita),
-  unidadeIdIdx: index("idx_receitas_unidade").on(table.unidadeId),
-}));
-
-export type Receita = typeof receitas.$inferSelect;
-export type InsertReceita = typeof receitas.$inferInsert;
-
-/**
- * Despesas
- */
-export const despesas = mysqlTable("despesas", {
-  id: int("id").autoincrement().primaryKey(),
-  unidadeId: int("unidadeId").notNull(),
-  categoriaId: int("categoriaId").notNull(),
-  fornecedorId: int("fornecedorId"),
-  descricao: varchar("descricao", { length: 255 }),
-  valor: int("valor").notNull(), // Valor em centavos
-  dataDespesa: date("dataDespesa", { mode: 'string' }).notNull(),
-  dataVencimento: date("dataVencimento", { mode: 'string' }),
-  observacoes: text("observacoes"),
-  status: mysqlEnum("status", ["pendente", "paga", "cancelada"]).default("paga").notNull(),
-  usuarioId: int("usuarioId").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => ({
-  dataDespesaIdx: index("idx_despesas_data").on(table.dataDespesa),
-  unidadeIdIdx: index("idx_despesas_unidade").on(table.unidadeId),
-}));
-
-export type Despesa = typeof despesas.$inferSelect;
-export type InsertDespesa = typeof despesas.$inferInsert;
-
-/**
- * Fornecedores
- */
-export const fornecedores = mysqlTable("fornecedores", {
-  id: int("id").autoincrement().primaryKey(),
-  nome: varchar("nome", { length: 255 }).notNull().unique(),
-  cnpj: varchar("cnpj", { length: 20 }),
-  contato: varchar("contato", { length: 255 }),
-  telefone: varchar("telefone", { length: 20 }),
-  email: varchar("email", { length: 255 }),
-  endereco: text("endereco"),
-  ativo: boolean("ativo").default(true).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
+export type UnidadeNew = typeof unidades.$inferInsert;
+export type Categoria = typeof categorias.$inferSelect;
+export type CategoriaNew = typeof categorias.$inferInsert;
 export type Fornecedor = typeof fornecedores.$inferSelect;
-export type InsertFornecedor = typeof fornecedores.$inferInsert;
-
-/**
- * Categorias de produto
- */
-export const categoriasProduto = mysqlTable("categorias_produto", {
-  id: int("id").autoincrement().primaryKey(),
-  nome: varchar("nome", { length: 100 }).notNull().unique(),
-  descricao: text("descricao"),
-  ativa: boolean("ativa").default(true).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type CategoriaProduto = typeof categoriasProduto.$inferSelect;
-export type InsertCategoriaProduto = typeof categoriasProduto.$inferInsert;
-
-/**
- * Produtos
- */
-export const produtos = mysqlTable("produtos", {
-  id: int("id").autoincrement().primaryKey(),
-  nome: varchar("nome", { length: 255 }).notNull(),
-  categoriaId: int("categoriaId").notNull(),
-  descricao: text("descricao"),
-  tipoEmbalagem: varchar("tipoEmbalagem", { length: 100 }),
-  sku: varchar("sku", { length: 100 }),
-  ativo: boolean("ativo").default(true).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type Produto = typeof produtos.$inferSelect;
-export type InsertProduto = typeof produtos.$inferInsert;
-
-/**
- * Embalagens de produto (variações de tamanho/peso)
- */
-export const embalagensProduto = mysqlTable("embalagens_produto", {
-  id: int("id").autoincrement().primaryKey(),
-  produtoId: int("produtoId").notNull(),
-  descricao: varchar("descricao", { length: 255 }).notNull(),
-  quantidade: int("quantidade").notNull(), // Quantidade em unidade base (ex: 500 para 500ml)
-  unidadeMedida: varchar("unidadeMedida", { length: 50 }).notNull(), // 'ml', 'l', 'kg', 'g', 'unidade'
-  ativa: boolean("ativa").default(true).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-}, (table) => ({
-  uniqueProdutoEmbalagem: unique().on(table.produtoId, table.descricao),
-}));
-
-export type EmbalagemProduto = typeof embalagensProduto.$inferSelect;
-export type InsertEmbalagemProduto = typeof embalagensProduto.$inferInsert;
-
-/**
- * Preços por fornecedor
- */
-export const precosFornecedor = mysqlTable("precos_fornecedor", {
-  id: int("id").autoincrement().primaryKey(),
-  embalagemId: int("embalagemId").notNull(),
-  fornecedorId: int("fornecedorId").notNull(),
-  precoCusto: int("precoCusto").notNull(), // Preço em centavos
-  dataPreco: date("dataPreco", { mode: 'string' }).notNull(),
-  ativo: boolean("ativo").default(true).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type PrecoFornecedor = typeof precosFornecedor.$inferSelect;
-export type InsertPrecoFornecedor = typeof precosFornecedor.$inferInsert;
-
-/**
- * Estoque atual por unidade
- */
-export const estoque = mysqlTable("estoque", {
-  id: int("id").autoincrement().primaryKey(),
-  unidadeId: int("unidadeId").notNull(),
-  embalagemId: int("embalagemId").notNull(),
-  quantidadeAtual: int("quantidadeAtual").default(0).notNull(),
-  quantidadeMinima: int("quantidadeMinima").default(0).notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-}, (table) => ({
-  uniqueEstoque: unique().on(table.unidadeId, table.embalagemId),
-}));
-
-export type Estoque = typeof estoque.$inferSelect;
-export type InsertEstoque = typeof estoque.$inferInsert;
-
-/**
- * Movimentações de estoque (entrada/saída)
- */
-export const movimentacoesEstoque = mysqlTable("movimentacoes_estoque", {
-  id: int("id").autoincrement().primaryKey(),
-  unidadeId: int("unidadeId").notNull(),
-  embalagemId: int("embalagemId").notNull(),
-  tipo: mysqlEnum("tipo", ["entrada", "saida"]).notNull(),
-  quantidade: int("quantidade").notNull(),
-  precoUnitario: int("precoUnitario"), // Preço em centavos (apenas para entrada)
-  descricao: varchar("descricao", { length: 255 }),
-  referenciaId: int("referenciaId"), // ID da compra/despesa relacionada
-  usuarioId: int("usuarioId").notNull(),
-  dataMovimentacao: date("dataMovimentacao", { mode: 'string' }).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type MovimentacaoEstoque = typeof movimentacoesEstoque.$inferSelect;
-export type InsertMovimentacaoEstoque = typeof movimentacoesEstoque.$inferInsert;
-
-/**
- * Auditoria de ações
- */
-export const auditoria = mysqlTable("auditoria", {
-  id: int("id").autoincrement().primaryKey(),
-  usuarioId: int("usuarioId").notNull(),
-  tabela: varchar("tabela", { length: 100 }).notNull(),
-  operacao: mysqlEnum("operacao", ["INSERT", "UPDATE", "DELETE"]).notNull(),
-  idRegistro: int("idRegistro").notNull(),
-  dadosAnteriores: text("dadosAnteriores"), // JSON
-  dadosNovos: text("dadosNovos"), // JSON
-  ipAddress: varchar("ipAddress", { length: 45 }),
-  dataAcao: timestamp("dataAcao").defaultNow().notNull(),
-});
-
-export type Auditoria = typeof auditoria.$inferSelect;
-export type InsertAuditoria = typeof auditoria.$inferInsert;
-
-
-
-/**
- * Contas a Pagar
- */
-export const contasPagar = mysqlTable("contas_pagar", {
-  id: int("id").autoincrement().primaryKey(),
-  unidadeId: int("unidadeId").notNull(),
-  categoriaDespesaId: int("categoriaDespesaId").notNull(),
-  fornecedorId: int("fornecedorId"),
-  descricao: varchar("descricao", { length: 255 }).notNull(),
-  valorTotal: int("valorTotal").notNull(), // Valor em centavos
-  dataVencimento: date("dataVencimento", { mode: 'string' }).notNull(),
-  dataPagamento: date("dataPagamento", { mode: 'string' }),
-  despesaId: int("despesaId"), // ID da despesa gerada quando pago
-  observacoes: text("observacoes"),
-  parcelaNumero: int("parcelaNumero"), // Número da parcela (1, 2, 3...)
-  parcelaTotal: int("parcelaTotal"), // Total de parcelas
-  contaPaiId: int("contaPaiId"), // ID da conta pai (para parcelas)
-  usuarioId: int("usuarioId").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type ContaPagar = typeof contasPagar.$inferSelect;
-export type InsertContaPagar = typeof contasPagar.$inferInsert;
-
-/**
- * Contas a Receber
- */
-export const contasReceber = mysqlTable("contas_receber", {
-  id: int("id").autoincrement().primaryKey(),
-  unidadeId: int("unidadeId").notNull(),
-  categoriaReceitaId: int("categoriaReceitaId").notNull(),
-  descricao: varchar("descricao", { length: 255 }).notNull(),
-  valorTotal: int("valorTotal").notNull(), // Valor em centavos
-  dataVencimento: date("dataVencimento", { mode: 'string' }).notNull(),
-  dataRecebimento: date("dataRecebimento", { mode: 'string' }),
-  receitaId: int("receitaId"), // ID da receita gerada quando recebido
-  observacoes: text("observacoes"),
-  parcelaNumero: int("parcelaNumero"), // Número da parcela (1, 2, 3...)
-  parcelaTotal: int("parcelaTotal"), // Total de parcelas
-  contaPaiId: int("contaPaiId"), // ID da conta pai (para parcelas)
-  usuarioId: int("usuarioId").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type ContaReceber = typeof contasReceber.$inferSelect;
-export type InsertContaReceber = typeof contasReceber.$inferInsert;
-
+export type FornecedorNew = typeof fornecedores.$inferInsert;
+export type FormaPagamento = typeof formasPagamento.$inferSelect;
+export type FormaPagamentoNew = typeof formasPagamento.$inferInsert;
+export type LinhaMargem = typeof linhasMargem.$inferSelect;
+export type LinhaMargemNew = typeof linhasMargem.$inferInsert;
+export type Movimentacao = typeof movimentacoes.$inferSelect;
+export type MovimentacaoNew = typeof movimentacoes.$inferInsert;
+export type Rateio = typeof rateios.$inferSelect;
+export type RateioNew = typeof rateios.$inferInsert;
+export type Titulo = typeof titulos.$inferSelect;
+export type TituloNew = typeof titulos.$inferInsert;
+export type AuditLogEntry = typeof auditLog.$inferSelect;
+export type AuditLogNew = typeof auditLog.$inferInsert;
+export type User = typeof users.$inferSelect;
+export type UserNew = typeof users.$inferInsert;

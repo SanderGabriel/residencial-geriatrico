@@ -1,8 +1,0 @@
-{
-  "query": "INSERT INTO contas_pagar (id, unidadeId, categoriaDespesaId, fornecedorId, descricao, valorTotal, dataVencimento, pago, dataPagamento, parcelado, numeroParcelas, observacoes, createdAt, updatedAt)\nVALUES ('test123', '1', '1', NULL, 'Teste Funcionalidades', 200.00, '2025-12-01', 0, NULL, 0, 1, 'Conta para testar edição e pagamento', NOW(), NOW());",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4BgzxiTcMHsWEcg.root --database 5psVkZM6qoRp4JnBtU9FUt --execute INSERT INTO contas_pagar (id, unidadeId, categoriaDespesaId, fornecedorId, descricao, valorTotal, dataVencimento, pago, dataPagamento, parcelado, numeroParcelas, observacoes, createdAt, updatedAt)\nVALUES ('test123', '1', '1', NULL, 'Teste Funcionalidades', 200.00, '2025-12-01', 0, NULL, 0, 1, 'Conta para testar edição e pagamento', NOW(), NOW());",
-  "returncode": 1,
-  "logs": [
-    "ERROR 1054 (42S22) at line 1: Unknown column 'pago' in 'field list'"
-  ]
-}

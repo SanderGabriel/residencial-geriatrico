@@ -1,1 +1,0 @@
-ALTER TABLE `produtos` ADD `tipoEmbalagem` varchar(100);
