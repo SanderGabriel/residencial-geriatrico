@@ -31,10 +31,11 @@ async function start() {
     // Apenas avisamos.
     console.log('🔧 Dev mode: front-end servido pelo Vite (http://localhost:5173)');
   } else {
-    // Em produção, servimos o build estático
-    const distPath = path.resolve(__dirname, '../public');
+    // Em produção: o esbuild produz dist/index.js e o Vite produz dist/public/.
+    // __dirname (do bundle) === dist/, então ./public é onde está o frontend.
+    const distPath = path.resolve(__dirname, 'public');
     app.use(express.static(distPath));
-    app.get('*', (_req, res) => {
+    app.get(/^(?!\/api).*/, (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

@@ -2,7 +2,7 @@
 
 Sistema financeiro do Grupo Novo Lar (4 ILPIs em Porto Alegre).
 
-**Status:** Phase 1 — Parte 1 (Foundation) ✅
+**Status:** Phase 1 — Partes 1, 2 e 3 ✅ (frontend funcional + alguns placeholders)
 
 ## Stack
 
@@ -92,6 +92,21 @@ Detalhes na [Especificação Técnica](./docs/) seção 4.2.
 
 ## Roadmap
 
-- **Parte 1 (atual):** Foundation — setup, schema, migrations, seed
-- **Parte 2:** Backend — 5 CRUDs mestre, movimentações + rateios, títulos, auditoria, testes
-- **Parte 3:** Frontend — 10 páginas, integração, build de produção, smoke test
+- **Parte 1 ✅:** Foundation — setup, schema, migrations, seed
+- **Parte 2 ✅:** Backend — 5 CRUDs mestre, movimentações + rateios, títulos, auditoria, testes unitários
+- **Parte 3 ✅:** Frontend — layout, routing, tRPC client, 6 páginas funcionais + 3 placeholders
+
+## Páginas
+
+| Rota | Status | Função |
+|---|---|---|
+| `/` | ✅ Funcional | Dashboard com últimas 5 movs e atalhos |
+| `/nova-saida` | ✅ Funcional | Form com SaidaRateio (busca categorias + tabela de rateios) |
+| `/nova-entrada` | ✅ Funcional | Mesmo form, tipo=Entrada |
+| `/extrato` | ✅ Funcional | Filtros (período, tipo, unidade, competência, beneficiário) + paginação + saldo acumulado da página |
+| `/titulos-pagar` | ✅ Funcional | Lista + modal Pagar (total/parcial) que cria movimentação vinculada |
+| `/configuracoes` | ✅ Funcional | 5 tabs CRUD: Unidades, Categorias (dinâmicas), Fornecedores, Formas pag, Linhas de margem |
+| `/titulos-receber` | ⚠️ Placeholder | Backend pronto; UI espelhar /titulos-pagar com tipo='Receber' |
+| `/agenda` | ⚠️ Placeholder | Requer biblioteca de calendário — Phase 2 |
+| `/economia` | ⚠️ Placeholder | Requer agregações backend + recharts — Phase 2/3 |
+| `/editar-movimentacao/:id` | ❌ Não criado | Backend `update` pronto; UI ainda não — Phase 2 |

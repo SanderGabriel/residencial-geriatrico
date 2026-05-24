@@ -1,26 +1,39 @@
+import { Route, Switch } from 'wouter';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
+import { trpc, queryClient, trpcClient } from './lib/trpc';
+import { DashboardLayout } from './components/layout/DashboardLayout';
+import { HomePage } from './pages/Home';
+import { NovaSaidaPage } from './pages/NovaSaida';
+import { NovaEntradaPage } from './pages/NovaEntrada';
+import { ExtratoPage } from './pages/Extrato';
+import { TitulosPagarPage } from './pages/TitulosPagar';
+import { TitulosReceberPage } from './pages/TitulosReceber';
+import { AgendaVencimentosPage } from './pages/AgendaVencimentos';
+import { RelatorioEconomiaPage } from './pages/RelatorioEconomia';
+import { ConfiguracoesPage } from './pages/Configuracoes';
+import { NotFoundPage } from './pages/NotFound';
+
 export function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-900">
-      <main className="max-w-xl text-center p-8">
-        <h1 className="text-3xl font-bold mb-2">Novo Lar Financeiro</h1>
-        <p className="text-slate-600 mb-6">
-          Sistema financeiro do Grupo Novo Lar — Phase 1 (Foundation)
-        </p>
-        <div className="rounded-lg border border-slate-200 bg-white p-6 text-left text-sm space-y-1">
-          <p>
-            <span className="font-semibold">Status:</span> Foundation pronto (schema + seed +
-            skeleton).
-          </p>
-          <p>
-            <span className="font-semibold">Próximo:</span> Parte 2 — routers tRPC (CRUD, rateios,
-            títulos, auditoria).
-          </p>
-          <p>
-            <span className="font-semibold">tRPC health:</span>{' '}
-            <code className="text-slate-700">GET /api/trpc/health</code>
-          </p>
-        </div>
-      </main>
-    </div>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <DashboardLayout>
+          <Switch>
+            <Route path="/" component={HomePage} />
+            <Route path="/nova-saida" component={NovaSaidaPage} />
+            <Route path="/nova-entrada" component={NovaEntradaPage} />
+            <Route path="/extrato" component={ExtratoPage} />
+            <Route path="/titulos-pagar" component={TitulosPagarPage} />
+            <Route path="/titulos-receber" component={TitulosReceberPage} />
+            <Route path="/agenda" component={AgendaVencimentosPage} />
+            <Route path="/economia" component={RelatorioEconomiaPage} />
+            <Route path="/configuracoes" component={ConfiguracoesPage} />
+            <Route component={NotFoundPage} />
+          </Switch>
+        </DashboardLayout>
+        <Toaster position="top-right" richColors />
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }
