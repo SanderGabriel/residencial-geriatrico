@@ -38,14 +38,18 @@ export const categoriasRouter = router({
     )
     .query(async ({ input }) => {
       const db = getDb();
-      const conds = [isNull(categorias.deletedAt)];
+      // Semântica: incluirInativas=true mostra TUDO (inclusive soft-deleted e ativa=false).
+      const conds = [] as any[];
+      if (!input?.incluirInativas) {
+        conds.push(isNull(categorias.deletedAt));
+        conds.push(eq(categorias.ativa, true));
+      }
       if (input?.grupo) conds.push(eq(categorias.grupo, input.grupo));
       if (input?.natureza) conds.push(eq(categorias.natureza, input.natureza));
-      if (!input?.incluirInativas) conds.push(eq(categorias.ativa, true));
       return db
         .select()
         .from(categorias)
-        .where(and(...conds))
+        .where(conds.length > 0 ? and(...conds) : undefined)
         .orderBy(categorias.grupo, categorias.nome);
     }),
 

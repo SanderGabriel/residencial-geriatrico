@@ -19,8 +19,9 @@ export const formasPagRouter = router({
     .input(z.object({ incluirInativas: z.boolean().default(false) }).optional())
     .query(async ({ input }) => {
       const db = getDb();
+      // Semântica: incluirInativas=true mostra TUDO (inclusive soft-deleted e ativa=false).
       const where = input?.incluirInativas
-        ? isNull(formasPagamento.deletedAt)
+        ? undefined
         : and(isNull(formasPagamento.deletedAt), eq(formasPagamento.ativa, true));
       return db.select().from(formasPagamento).where(where).orderBy(formasPagamento.nome);
     }),

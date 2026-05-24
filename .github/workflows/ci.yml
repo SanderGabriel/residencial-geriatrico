@@ -9,7 +9,25 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: novo_lar_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost -uroot -proot"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/novo_lar_test
+      TEST_DATABASE_URL: mysql://root:root@127.0.0.1:3306/novo_lar_test
 
     steps:
       - uses: actions/checkout@v4
@@ -29,7 +47,10 @@ jobs:
       - name: Type check
         run: pnpm check
 
-      - name: Test
+      - name: Apply migrations
+        run: pnpm db:migrate
+
+      - name: Run tests (unit + integration + e2e)
         run: pnpm test
 
       - name: Build

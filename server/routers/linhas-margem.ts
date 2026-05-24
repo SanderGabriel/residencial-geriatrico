@@ -21,8 +21,9 @@ export const linhasMargemRouter = router({
     .input(z.object({ incluirInativas: z.boolean().default(false) }).optional())
     .query(async ({ input }) => {
       const db = getDb();
+      // Semântica: incluirInativas=true mostra TUDO (inclusive soft-deleted e ativa=false).
       const where = input?.incluirInativas
-        ? isNull(linhasMargem.deletedAt)
+        ? undefined
         : and(isNull(linhasMargem.deletedAt), eq(linhasMargem.ativa, true));
       return db.select().from(linhasMargem).where(where).orderBy(linhasMargem.nome);
     }),

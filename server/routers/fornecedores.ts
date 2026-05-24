@@ -30,8 +30,9 @@ export const fornecedoresRouter = router({
     .input(z.object({ incluirInativos: z.boolean().default(false) }).optional())
     .query(async ({ input }) => {
       const db = getDb();
+      // Semântica: incluirInativos=true mostra TUDO (inclusive soft-deleted e ativa=false).
       const where = input?.incluirInativos
-        ? isNull(fornecedores.deletedAt)
+        ? undefined
         : and(isNull(fornecedores.deletedAt), eq(fornecedores.ativa, true));
       return db.select().from(fornecedores).where(where).orderBy(fornecedores.nome);
     }),

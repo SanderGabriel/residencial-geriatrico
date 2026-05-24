@@ -20,8 +20,10 @@ export const unidadesRouter = router({
     .input(z.object({ incluirInativas: z.boolean().default(false) }).optional())
     .query(async ({ input }) => {
       const db = getDb();
+      // Semântica: incluirInativas=true mostra TUDO (inclusive soft-deleted e ativa=false).
+      // Default mostra só registros vivos e ativos.
       const where = input?.incluirInativas
-        ? isNull(unidades.deletedAt)
+        ? undefined
         : and(isNull(unidades.deletedAt), eq(unidades.ativa, true));
       return db.select().from(unidades).where(where).orderBy(unidades.nome);
     }),

@@ -8,10 +8,10 @@ import {
   decimal,
   date,
   mysqlEnum,
-  json,
   uniqueIndex,
   index,
 } from 'drizzle-orm/mysql-core';
+import { jsonText } from './custom-types';
 
 // ---------- Users (OAuth-backed) ----------
 export const users = mysqlTable(
@@ -260,8 +260,8 @@ export const auditLog = mysqlTable(
     tabela: varchar('tabela', { length: 100 }).notNull(),
     recordId: int('record_id').notNull(),
     acao: mysqlEnum('acao', ['CREATE', 'UPDATE', 'DELETE']).notNull(),
-    dadosAntes: json('dados_antes'),
-    dadosDepois: json('dados_depois'),
+    dadosAntes: jsonText('dados_antes'),
+    dadosDepois: jsonText('dados_depois'),
     usuarioId: int('usuario_id'),
     usuarioNome: varchar('usuario_nome', { length: 255 }),
     ipAddress: varchar('ip_address', { length: 45 }),
