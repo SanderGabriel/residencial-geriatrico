@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { Input, Label, Select } from '@/components/ui/Input';
+import { DateInputBR } from '@/components/ui/DateInputBR';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { trpc } from '@/lib/trpc';
 import { formatBRL, formatDate } from '@/lib/format';
@@ -129,18 +130,16 @@ export function ExtratoPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <Label>Data início</Label>
-              <Input
-                type="date"
+              <DateInputBR
                 value={filtros.periodoInicio}
-                onChange={(e) => setFiltros({ ...filtros, periodoInicio: e.target.value })}
+                onChange={(iso) => setFiltros({ ...filtros, periodoInicio: iso })}
               />
             </div>
             <div>
               <Label>Data fim</Label>
-              <Input
-                type="date"
+              <DateInputBR
                 value={filtros.periodoFim}
-                onChange={(e) => setFiltros({ ...filtros, periodoFim: e.target.value })}
+                onChange={(iso) => setFiltros({ ...filtros, periodoFim: iso })}
               />
             </div>
             <div>

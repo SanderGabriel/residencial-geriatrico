@@ -162,7 +162,7 @@ describe('<SaidaRateio>', () => {
     expect(screen.queryByText(/falta|excesso/i)).not.toBeInTheDocument();
   });
 
-  it('alterar valor no input chama onChange', () => {
+  it('alterar valor no input chama onChange (acumulador de centavos)', () => {
     const onChange = vi.fn();
     render(
       <SaidaRateio
@@ -172,9 +172,14 @@ describe('<SaidaRateio>', () => {
         valorTotal={100}
       />,
     );
-    const input = screen.getByRole('spinbutton');
-    fireEvent.change(input, { target: { value: '75' } });
-    expect(onChange).toHaveBeenCalledWith([{ categoriaId: 1, categoriaNome: 'X', valor: 75 }]);
+    // CurrencyInput é text, posicionado pela cell (vamos pegar o input dentro da tabela)
+    const inputs = screen.getAllByRole('textbox');
+    // o primeiro é o campo de busca, o segundo é o de valor
+    const inputValor = inputs[1];
+    fireEvent.change(inputValor, { target: { value: '7500' } });
+    expect(onChange).toHaveBeenCalledWith([
+      { categoriaId: 1, categoriaNome: 'X', valor: 75 },
+    ]);
   });
 
   it('botão remover chama onChange com lista filtrada', async () => {

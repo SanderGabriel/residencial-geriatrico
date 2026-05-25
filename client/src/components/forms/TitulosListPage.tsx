@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
 import { Input, Label, Select, Textarea } from '@/components/ui/Input';
+import { CurrencyInput } from '@/components/ui/CurrencyInput';
+import { DateInputBR } from '@/components/ui/DateInputBR';
 import {
   Table,
   TableBody,
@@ -34,7 +36,7 @@ interface PagamentoState {
   tituloId: number;
   descricao: string;
   saldoEmAberto: number;
-  valor: string;
+  valor: number;
   dataCaixa: string;
   competencia: string;
   formaPagamentoId: string;
@@ -44,8 +46,8 @@ interface PagamentoState {
 interface EditState {
   id?: number;
   descricao: string;
-  valorTotal: string;
-  desconto: string;
+  valorTotal: number;
+  desconto: number;
   dataVencimento: string;
   competencia: string;
   fornecedorId: string;
@@ -117,7 +119,7 @@ export function TitulosListPage({ tipo }: Props) {
       tituloId: t.id,
       descricao: t.descricao,
       saldoEmAberto: saldo,
-      valor: saldo.toFixed(2),
+      valor: saldo,
       dataCaixa: hojeISO(),
       competencia: competenciaAtual(),
       formaPagamentoId: '',
@@ -129,7 +131,7 @@ export function TitulosListPage({ tipo }: Props) {
     if (!pagamento) return;
     pagarMut.mutate({
       tituloId: pagamento.tituloId,
-      valorPagamento: parseFloat(pagamento.valor) || 0,
+      valorPagamento: pagamento.valor,
       dataCaixa: pagamento.dataCaixa,
       competencia: pagamento.competencia,
       formaPagamentoId: pagamento.formaPagamentoId ? Number(pagamento.formaPagamentoId) : null,
@@ -148,8 +150,8 @@ export function TitulosListPage({ tipo }: Props) {
   function abrirNovo() {
     setEditando({
       descricao: '',
-      valorTotal: '',
-      desconto: '',
+      valorTotal: 0,
+      desconto: 0,
       dataVencimento: hojeISO(),
       competencia: competenciaAtual(),
       fornecedorId: '',
@@ -170,8 +172,8 @@ export function TitulosListPage({ tipo }: Props) {
     setEditando({
       id: t.id,
       descricao: t.descricao,
-      valorTotal: String(Number(t.valorTotal ?? 0)),
-      desconto: Number(t.desconto) ? String(Number(t.desconto)) : '',
+      valorTotal: Number(t.valorTotal ?? 0),
+      desconto: Number(t.desconto ?? 0),
       dataVencimento:
         typeof t.dataVencimento === 'string' ? t.dataVencimento.slice(0, 10) : hojeISO(),
       competencia: t.competencia ?? competenciaAtual(),
@@ -182,18 +184,20 @@ export function TitulosListPage({ tipo }: Props) {
 
   function salvarTitulo() {
     if (!editando) return;
-    const valor = parseFloat(editando.valorTotal) || 0;
-    const desc = parseFloat(editando.desconto) || 0;
-    if (valor <= 0) {
+    if (editando.valorTotal <= 0) {
       toast.error('Informe um valor maior que zero.');
+      return;
+    }
+    if (!editando.dataVencimento) {
+      toast.error('Informe uma data de vencimento válida.');
       return;
     }
     if (editando.id) {
       updateTituloMut.mutate({
         id: editando.id,
         descricao: editando.descricao,
-        valorTotal: valor,
-        desconto: desc,
+        valorTotal: editando.valorTotal,
+        desconto: editando.desconto,
         dataVencimento: editando.dataVencimento,
         competencia: editando.competencia || null,
         fornecedorId: editando.fornecedorId ? Number(editando.fornecedorId) : null,
@@ -209,8 +213,8 @@ export function TitulosListPage({ tipo }: Props) {
         unidadeId: primeiraUnidade.id,
         tipo,
         descricao: editando.descricao,
-        valorTotal: valor,
-        desconto: desc,
+        valorTotal: editando.valorTotal,
+        desconto: editando.desconto,
         dataVencimento: editando.dataVencimento,
         competencia: editando.competencia || undefined,
         fornecedorId: editando.fornecedorId ? Number(editando.fornecedorId) : null,
@@ -361,7 +365,7 @@ export function TitulosListPage({ tipo }: Props) {
               disabled={
                 !pagamento ||
                 !pagamento.categoriaId ||
-                parseFloat(pagamento.valor) <= 0 ||
+                pagamento.valor <= 0 ||
                 pagarMut.isPending
               }
             >
@@ -378,22 +382,17 @@ export function TitulosListPage({ tipo }: Props) {
             </div>
             <div>
               <Label required>Valor a {labelAcao.toLowerCase()}</Label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0.01"
-                max={pagamento.saldoEmAberto}
+              <CurrencyInput
                 value={pagamento.valor}
-                onChange={(e) => setPagamento({ ...pagamento, valor: e.target.value })}
+                onChange={(v) => setPagamento({ ...pagamento, valor: v })}
               />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label required>Data</Label>
-                <Input
-                  type="date"
+                <DateInputBR
                   value={pagamento.dataCaixa}
-                  onChange={(e) => setPagamento({ ...pagamento, dataCaixa: e.target.value })}
+                  onChange={(iso) => setPagamento({ ...pagamento, dataCaixa: iso })}
                 />
               </div>
               <div>
@@ -455,6 +454,8 @@ export function TitulosListPage({ tipo }: Props) {
               disabled={
                 !editando?.descricao ||
                 !editando?.valorTotal ||
+                editando.valorTotal <= 0 ||
+                !editando?.dataVencimento ||
                 createTituloMut.isPending ||
                 updateTituloMut.isPending
               }
@@ -477,32 +478,25 @@ export function TitulosListPage({ tipo }: Props) {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label required>Valor total</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0.01"
+                <CurrencyInput
                   value={editando.valorTotal}
-                  onChange={(e) => setEditando({ ...editando, valorTotal: e.target.value })}
+                  onChange={(v) => setEditando({ ...editando, valorTotal: v })}
                 />
               </div>
               <div>
                 <Label>Desconto</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
+                <CurrencyInput
                   value={editando.desconto}
-                  onChange={(e) => setEditando({ ...editando, desconto: e.target.value })}
+                  onChange={(v) => setEditando({ ...editando, desconto: v })}
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label required>Vencimento</Label>
-                <Input
-                  type="date"
+                <DateInputBR
                   value={editando.dataVencimento}
-                  onChange={(e) => setEditando({ ...editando, dataVencimento: e.target.value })}
+                  onChange={(iso) => setEditando({ ...editando, dataVencimento: iso })}
                 />
               </div>
               <div>

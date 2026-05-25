@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, Select } from '@/components/ui/Input';
+import { DateInputBR } from '@/components/ui/DateInputBR';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { trpc } from '@/lib/trpc';
 import { formatBRL } from '@/lib/format';
@@ -97,18 +98,16 @@ export function RelatorioEconomiaPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div>
               <Label>Data início</Label>
-              <Input
-                type="date"
+              <DateInputBR
                 value={draft.periodoInicio}
-                onChange={(e) => setDraft({ ...draft, periodoInicio: e.target.value })}
+                onChange={(iso) => setDraft({ ...draft, periodoInicio: iso })}
               />
             </div>
             <div>
               <Label>Data fim</Label>
-              <Input
-                type="date"
+              <DateInputBR
                 value={draft.periodoFim}
-                onChange={(e) => setDraft({ ...draft, periodoFim: e.target.value })}
+                onChange={(iso) => setDraft({ ...draft, periodoFim: iso })}
               />
             </div>
             <div>

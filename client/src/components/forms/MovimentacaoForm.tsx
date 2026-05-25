@@ -3,6 +3,8 @@ import { useLocation } from 'wouter';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, Select, Textarea } from '@/components/ui/Input';
+import { CurrencyInput } from '@/components/ui/CurrencyInput';
+import { DateInputBR } from '@/components/ui/DateInputBR';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { SaidaRateio, rateiosFechado, type RateioRow } from './SaidaRateio';
 import { competenciaAtual, hojeISO } from '@/lib/format';
@@ -34,9 +36,9 @@ export function MovimentacaoForm({ tipo, movimentacaoId }: Props) {
   const [unidadeId, setUnidadeId] = useState<string>('');
   const [dataCaixa, setDataCaixa] = useState<string>(hojeISO());
   const [competencia, setCompetencia] = useState<string>(competenciaAtual());
-  const [valorTotal, setValorTotal] = useState<string>('');
-  const [desconto, setDesconto] = useState<string>('');
-  const [frete, setFrete] = useState<string>('');
+  const [valorTotal, setValorTotal] = useState<number>(0);
+  const [desconto, setDesconto] = useState<number>(0);
+  const [frete, setFrete] = useState<number>(0);
   const [formaPagamentoId, setFormaPagamentoId] = useState<string>('');
   const [fornecedorId, setFornecedorId] = useState<string>('');
   const [pagador, setPagador] = useState<string>('');
@@ -53,9 +55,9 @@ export function MovimentacaoForm({ tipo, movimentacaoId }: Props) {
     setUnidadeId(String(m.unidadeId));
     setDataCaixa(typeof m.dataCaixa === 'string' ? m.dataCaixa.slice(0, 10) : hojeISO());
     setCompetencia(m.competencia);
-    setValorTotal(String(Number(m.valorTotal)));
-    setDesconto(Number(m.desconto) ? String(Number(m.desconto)) : '');
-    setFrete(Number(m.frete) ? String(Number(m.frete)) : '');
+    setValorTotal(Number(m.valorTotal));
+    setDesconto(Number(m.desconto));
+    setFrete(Number(m.frete));
     setFormaPagamentoId(m.formaPagamentoId ? String(m.formaPagamentoId) : '');
     setFornecedorId(m.fornecedorId ? String(m.fornecedorId) : '');
     setPagador(m.pagador ?? '');
@@ -72,9 +74,9 @@ export function MovimentacaoForm({ tipo, movimentacaoId }: Props) {
     setHidratado(true);
   }, [isEdit, hidratado, movQ.data]);
 
-  const valorTotalNum = useMemo(() => parseFloat(valorTotal) || 0, [valorTotal]);
-  const descontoNum = useMemo(() => parseFloat(desconto) || 0, [desconto]);
-  const freteNum = useMemo(() => parseFloat(frete) || 0, [frete]);
+  const valorTotalNum = valorTotal;
+  const descontoNum = desconto;
+  const freteNum = frete;
 
   const createMut = trpc.movimentacoes.create.useMutation({
     onSuccess: () => {
@@ -180,12 +182,7 @@ export function MovimentacaoForm({ tipo, movimentacaoId }: Props) {
           </div>
           <div>
             <Label required>Data</Label>
-            <Input
-              type="date"
-              value={dataCaixa}
-              onChange={(e) => setDataCaixa(e.target.value)}
-              required
-            />
+            <DateInputBR value={dataCaixa} onChange={setDataCaixa} />
           </div>
           <div>
             <Label required>Competência (MM/AAAA)</Label>
@@ -199,34 +196,15 @@ export function MovimentacaoForm({ tipo, movimentacaoId }: Props) {
 
           <div>
             <Label required>Valor total</Label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={valorTotal}
-              onChange={(e) => setValorTotal(e.target.value)}
-              required
-            />
+            <CurrencyInput value={valorTotal} onChange={setValorTotal} />
           </div>
           <div>
             <Label>Desconto</Label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              value={desconto}
-              onChange={(e) => setDesconto(e.target.value)}
-            />
+            <CurrencyInput value={desconto} onChange={setDesconto} />
           </div>
           <div>
             <Label>Frete</Label>
-            <Input
-              type="number"
-              step="0.01"
-              min="0"
-              value={frete}
-              onChange={(e) => setFrete(e.target.value)}
-            />
+            <CurrencyInput value={frete} onChange={setFrete} />
           </div>
 
           <div>

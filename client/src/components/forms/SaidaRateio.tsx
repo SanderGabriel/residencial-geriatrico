@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Trash2, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { formatBRL } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -110,13 +111,10 @@ export function SaidaRateio({ categorias, rateios, onChange, valorTotal }: Props
                 <tr key={r.categoriaId}>
                   <td className="px-3 py-2 text-slate-900">{r.categoriaNome}</td>
                   <td className="px-3 py-2">
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={r.valor || ''}
-                      onChange={(e) => alterarValor(i, parseFloat(e.target.value) || 0)}
-                      className="text-right h-8"
+                    <CurrencyInput
+                      value={r.valor}
+                      onChange={(v) => alterarValor(i, v)}
+                      className="h-8"
                     />
                   </td>
                   <td className="px-2">
