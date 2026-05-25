@@ -7,11 +7,12 @@ import { linhasMargemRouter } from './linhas-margem';
 import { movimentacoesRouter } from './movimentacoes';
 import { titulosRouter } from './titulos';
 import { auditRouter } from './audit';
+import { relatoriosRouter } from './relatorios';
 
 export const appRouter = router({
   health: publicProcedure.query(() => ({
     status: 'ok',
-    phase: 'phase-1-parte-2-backend',
+    phase: 'phase-1-complete',
     timestamp: new Date().toISOString(),
   })),
   unidades: unidadesRouter,
@@ -22,6 +23,7 @@ export const appRouter = router({
   movimentacoes: movimentacoesRouter,
   titulos: titulosRouter,
   audit: auditRouter,
+  relatorios: relatoriosRouter,
 });
 
 export type AppRouter = typeof appRouter;

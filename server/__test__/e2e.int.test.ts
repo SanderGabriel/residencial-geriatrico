@@ -180,6 +180,37 @@ describe('E2E HTTP via tRPC client real', () => {
     ).rejects.toThrow();
   });
 
+  it('Relatórios chegam ao cliente com agregações corretas', async () => {
+    const seed = await seedMinimo(db);
+    // 1000 de receita, 300 de custo → margem 700, 70%
+    await client.movimentacoes.create.mutate({
+      unidadeId: seed.unidade.id,
+      tipo: 'Entrada',
+      dataCaixa: '2026-05-15',
+      competencia: '05/2026',
+      valorTotal: 1000,
+      rateios: [{ categoriaId: seed.catReceita.id, valor: 1000 }],
+    });
+    await client.movimentacoes.create.mutate({
+      unidadeId: seed.unidade.id,
+      tipo: 'Saída',
+      dataCaixa: '2026-05-16',
+      competencia: '05/2026',
+      valorTotal: 300,
+      rateios: [{ categoriaId: seed.catCusto.id, valor: 300 }],
+    });
+
+    const r = await client.relatorios.porNatureza.query();
+    expect(r.totais.Receita).toBe(1000);
+    expect(r.totais.Custo).toBe(300);
+    expect(r.margem).toBe(700);
+    expect(r.margemPct).toBeCloseTo(70, 1);
+
+    const u = await client.relatorios.porUnidade.query();
+    expect(u.itens).toHaveLength(1);
+    expect(u.itens[0].saldo).toBe(700);
+  });
+
   it('Datas como string YYYY-MM-DD persistem sem shift de timezone', async () => {
     const seed = await seedMinimo(db);
     const m = await client.movimentacoes.create.mutate({

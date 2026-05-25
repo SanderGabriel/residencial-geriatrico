@@ -2,7 +2,7 @@
 
 Sistema financeiro do Grupo Novo Lar (4 ILPIs em Porto Alegre).
 
-**Status:** Phase 1 — Partes 1, 2 e 3 ✅ (frontend funcional + alguns placeholders)
+**Status:** Phase 1 ✅ completa (todas as 10 páginas funcionais, sem placeholders)
 
 ## Stack
 
@@ -59,7 +59,7 @@ pnpm dev
 
 ## Testes
 
-134 testes em 11 arquivos. Para rodar todos localmente precisa de MySQL 8 (ou MariaDB 10.5+) rodando:
+155 testes em 13 arquivos. Para rodar todos localmente precisa de MySQL 8 (ou MariaDB 10.5+) rodando:
 
 ```bash
 # Sobe MySQL via Docker
@@ -141,7 +141,7 @@ Detalhes na [Especificação Técnica](./docs/) seção 4.2.
 | `/extrato` | ✅ Funcional | Filtros (período, tipo, unidade, competência, beneficiário) + paginação + saldo acumulado da página |
 | `/titulos-pagar` | ✅ Funcional | Lista + modal Pagar (total/parcial) que cria movimentação vinculada |
 | `/configuracoes` | ✅ Funcional | 5 tabs CRUD: Unidades, Categorias (dinâmicas), Fornecedores, Formas pag, Linhas de margem |
-| `/titulos-receber` | ⚠️ Placeholder | Backend pronto; UI espelhar /titulos-pagar com tipo='Receber' |
-| `/agenda` | ⚠️ Placeholder | Requer biblioteca de calendário — Phase 2 |
-| `/economia` | ⚠️ Placeholder | Requer agregações backend + recharts — Phase 2/3 |
-| `/editar-movimentacao/:id` | ❌ Não criado | Backend `update` pronto; UI ainda não — Phase 2 |
+| `/titulos-receber` | ✅ Funcional | Mesma UI de Pagar (componente compartilhado), filtra categorias de Receita |
+| `/agenda` | ✅ Funcional | Títulos agrupados em 4 faixas (vencidos / 7 dias / 30 dias / futuros) com totais |
+| `/economia` | ✅ Funcional | 3 agregações backend (por natureza / linha / unidade) + tabelas com barras horizontais sem deps de gráfico |
+| `/editar-movimentacao/:id` | ✅ Funcional | Pré-preenchido via `movimentacoes.get`, mantém tipo e unidade imutáveis |

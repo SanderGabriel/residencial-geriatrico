@@ -7,6 +7,7 @@ import { HomePage } from './pages/Home';
 import { NovaSaidaPage } from './pages/NovaSaida';
 import { NovaEntradaPage } from './pages/NovaEntrada';
 import { ExtratoPage } from './pages/Extrato';
+import { EditarMovimentacaoPage } from './pages/EditarMovimentacao';
 import { TitulosPagarPage } from './pages/TitulosPagar';
 import { TitulosReceberPage } from './pages/TitulosReceber';
 import { AgendaVencimentosPage } from './pages/AgendaVencimentos';
@@ -24,6 +25,7 @@ export function App() {
             <Route path="/nova-saida" component={NovaSaidaPage} />
             <Route path="/nova-entrada" component={NovaEntradaPage} />
             <Route path="/extrato" component={ExtratoPage} />
+            <Route path="/editar-movimentacao/:id" component={EditarMovimentacaoPage} />
             <Route path="/titulos-pagar" component={TitulosPagarPage} />
             <Route path="/titulos-receber" component={TitulosReceberPage} />
             <Route path="/agenda" component={AgendaVencimentosPage} />

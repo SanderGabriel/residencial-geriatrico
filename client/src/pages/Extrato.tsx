@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'wouter';
 import { toast } from 'sonner';
-import { Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input, Label, Select } from '@/components/ui/Input';
@@ -223,13 +224,22 @@ export function ExtratoPage() {
                         {formatBRL(m.saldo)}
                       </TableCell>
                       <TableCell>
-                        <button
-                          onClick={() => deletar(m.id)}
-                          className="p-1 hover:bg-red-50 rounded text-red-600"
-                          aria-label="Excluir"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        <div className="flex gap-1">
+                          <Link
+                            href={`/editar-movimentacao/${m.id}`}
+                            className="p-1 hover:bg-slate-100 rounded text-slate-700"
+                            aria-label="Editar"
+                          >
+                            <Pencil size={14} />
+                          </Link>
+                          <button
+                            onClick={() => deletar(m.id)}
+                            className="p-1 hover:bg-red-50 rounded text-red-600"
+                            aria-label="Excluir"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
