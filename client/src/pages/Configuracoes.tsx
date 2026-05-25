@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/Table';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { trpc } from '@/lib/trpc';
 import { cn } from '@/lib/utils';
 
@@ -67,6 +68,7 @@ export function ConfiguracoesPage() {
 function UnidadesTab() {
   const utils = trpc.useUtils();
   const listQ = trpc.unidades.list.useQuery();
+  const [confirmNode, askConfirm] = useConfirm();
   const [editing, setEditing] = useState<{ id?: number; nome: string; descricao: string } | null>(
     null,
   );
@@ -106,6 +108,7 @@ function UnidadesTab() {
 
   return (
     <>
+      {confirmNode}
       <Card>
         <CardContent className="p-0">
           <div className="flex justify-end p-3 border-b border-slate-200">
@@ -126,7 +129,9 @@ function UnidadesTab() {
               </TableHeader>
               <TableBody>
                 {listQ.data?.length === 0 ? (
-                  <TableEmpty colSpan={3} />
+                  <TableEmpty colSpan={3}>
+                    Nenhum registro ainda. Clique em <span className="font-medium">Novo</span> acima.
+                  </TableEmpty>
                 ) : (
                   listQ.data?.map((u) => (
                     <TableRow key={u.id}>
@@ -144,8 +149,13 @@ function UnidadesTab() {
                             <Pencil size={14} />
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm(`Excluir unidade "${u.nome}"?`)) deleteMut.mutate({ id: u.id });
+                            onClick={async () => {
+                              if (await askConfirm({
+                                title: 'Confirmar exclusão',
+                                description: `Excluir unidade "${u.nome}"?`,
+                                destructive: true,
+                                confirmLabel: 'Excluir',
+                              })) deleteMut.mutate({ id: u.id })
                             }}
                             className="p-1 hover:bg-red-50 rounded text-red-600"
                             aria-label="Excluir"
@@ -207,6 +217,7 @@ type Natureza = 'Receita' | 'Custo' | 'Despesa' | 'Imposto' | 'Investimento' | '
 function CategoriasTab() {
   const utils = trpc.useUtils();
   const listQ = trpc.categorias.list.useQuery();
+  const [confirmNode, askConfirm] = useConfirm();
   const [editing, setEditing] = useState<
     | { id?: number; nome: string; grupo: string; natureza: Natureza }
     | null
@@ -256,6 +267,7 @@ function CategoriasTab() {
 
   return (
     <>
+      {confirmNode}
       <Card>
         <CardContent className="p-0">
           <div className="flex justify-end p-3 border-b border-slate-200">
@@ -280,7 +292,9 @@ function CategoriasTab() {
               </TableHeader>
               <TableBody>
                 {listQ.data?.length === 0 ? (
-                  <TableEmpty colSpan={4} />
+                  <TableEmpty colSpan={4}>
+                    Nenhum registro ainda. Clique em <span className="font-medium">Novo</span> acima.
+                  </TableEmpty>
                 ) : (
                   listQ.data?.map((c) => (
                     <TableRow key={c.id}>
@@ -303,9 +317,13 @@ function CategoriasTab() {
                             <Pencil size={14} />
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm(`Excluir categoria "${c.nome}"?`))
-                                deleteMut.mutate({ id: c.id });
+                            onClick={async () => {
+                              if (await askConfirm({
+                                title: 'Confirmar exclusão',
+                                description: `Excluir categoria "${c.nome}"?`,
+                                destructive: true,
+                                confirmLabel: 'Excluir',
+                              })) deleteMut.mutate({ id: c.id })
                             }}
                             className="p-1 hover:bg-red-50 rounded text-red-600"
                           >
@@ -386,6 +404,7 @@ function CategoriasTab() {
 function FornecedoresTab() {
   const utils = trpc.useUtils();
   const listQ = trpc.fornecedores.list.useQuery();
+  const [confirmNode, askConfirm] = useConfirm();
   const [editing, setEditing] = useState<
     | { id?: number; nome: string; documento: string; telefone: string; email: string }
     | null
@@ -429,6 +448,7 @@ function FornecedoresTab() {
 
   return (
     <>
+      {confirmNode}
       <Card>
         <CardContent className="p-0">
           <div className="flex justify-end p-3 border-b border-slate-200">
@@ -456,7 +476,9 @@ function FornecedoresTab() {
               </TableHeader>
               <TableBody>
                 {listQ.data?.length === 0 ? (
-                  <TableEmpty colSpan={5} />
+                  <TableEmpty colSpan={5}>
+                    Nenhum registro ainda. Clique em <span className="font-medium">Novo</span> acima.
+                  </TableEmpty>
                 ) : (
                   listQ.data?.map((f) => (
                     <TableRow key={f.id}>
@@ -481,9 +503,13 @@ function FornecedoresTab() {
                             <Pencil size={14} />
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm(`Excluir fornecedor "${f.nome}"?`))
-                                deleteMut.mutate({ id: f.id });
+                            onClick={async () => {
+                              if (await askConfirm({
+                                title: 'Confirmar exclusão',
+                                description: `Excluir fornecedor "${f.nome}"?`,
+                                destructive: true,
+                                confirmLabel: 'Excluir',
+                              })) deleteMut.mutate({ id: f.id })
                             }}
                             className="p-1 hover:bg-red-50 rounded text-red-600"
                           >
@@ -559,6 +585,7 @@ function FornecedoresTab() {
 function FormasPagTab() {
   const utils = trpc.useUtils();
   const listQ = trpc.formasPagamento.list.useQuery();
+  const [confirmNode, askConfirm] = useConfirm();
   const [editing, setEditing] = useState<{ id?: number; nome: string } | null>(null);
 
   const createMut = trpc.formasPagamento.create.useMutation({
@@ -582,6 +609,7 @@ function FormasPagTab() {
 
   return (
     <>
+      {confirmNode}
       <Card>
         <CardContent className="p-0">
           <div className="flex justify-end p-3 border-b border-slate-200">
@@ -601,7 +629,9 @@ function FormasPagTab() {
               </TableHeader>
               <TableBody>
                 {listQ.data?.length === 0 ? (
-                  <TableEmpty colSpan={2} />
+                  <TableEmpty colSpan={2}>
+                    Nenhum registro ainda. Clique em <span className="font-medium">Novo</span> acima.
+                  </TableEmpty>
                 ) : (
                   listQ.data?.map((f) => (
                     <TableRow key={f.id}>
@@ -612,8 +642,13 @@ function FormasPagTab() {
                             <Pencil size={14} />
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm(`Excluir "${f.nome}"?`)) deleteMut.mutate({ id: f.id });
+                            onClick={async () => {
+                              if (await askConfirm({
+                                title: 'Confirmar exclusão',
+                                description: `Excluir "${f.nome}"?`,
+                                destructive: true,
+                                confirmLabel: 'Excluir',
+                              })) deleteMut.mutate({ id: f.id })
                             }}
                             className="p-1 hover:bg-red-50 rounded text-red-600"
                           >
@@ -658,6 +693,7 @@ function FormasPagTab() {
 function LinhasMargemTab() {
   const utils = trpc.useUtils();
   const listQ = trpc.linhasMargem.list.useQuery();
+  const [confirmNode, askConfirm] = useConfirm();
   const [editing, setEditing] = useState<
     | { id?: number; nome: string; descricao: string; requerNomeCustomizado: boolean }
     | null
@@ -689,6 +725,7 @@ function LinhasMargemTab() {
 
   return (
     <>
+      {confirmNode}
       <Card>
         <CardContent className="p-0">
           <div className="flex justify-end p-3 border-b border-slate-200">
@@ -713,7 +750,9 @@ function LinhasMargemTab() {
               </TableHeader>
               <TableBody>
                 {listQ.data?.length === 0 ? (
-                  <TableEmpty colSpan={4} />
+                  <TableEmpty colSpan={4}>
+                    Nenhum registro ainda. Clique em <span className="font-medium">Novo</span> acima.
+                  </TableEmpty>
                 ) : (
                   listQ.data?.map((l) => (
                     <TableRow key={l.id}>
@@ -736,8 +775,13 @@ function LinhasMargemTab() {
                             <Pencil size={14} />
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm(`Excluir linha "${l.nome}"?`)) deleteMut.mutate({ id: l.id });
+                            onClick={async () => {
+                              if (await askConfirm({
+                                title: 'Confirmar exclusão',
+                                description: `Excluir linha "${l.nome}"?`,
+                                destructive: true,
+                                confirmLabel: 'Excluir',
+                              })) deleteMut.mutate({ id: l.id })
                             }}
                             className="p-1 hover:bg-red-50 rounded text-red-600"
                           >

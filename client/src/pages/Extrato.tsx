@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'wouter';
 import { toast } from 'sonner';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { Input, Label, Select } from '@/components/ui/Input';
 import { Table, TableBody, TableCell, TableEmpty, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { trpc } from '@/lib/trpc';
@@ -33,6 +34,7 @@ export function ExtratoPage() {
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_INICIAIS);
   const [aplicado, setAplicado] = useState<Filtros>(FILTROS_INICIAIS);
   const [page, setPage] = useState(1);
+  const [confirmNode, askConfirm] = useConfirm();
 
   const unidadesQ = trpc.unidades.list.useQuery();
 
@@ -85,17 +87,37 @@ export function ExtratoPage() {
     setPage(1);
   }
 
-  function deletar(id: number) {
-    if (!confirm('Confirma exclusão desta movimentação?')) return;
+  async function deletar(id: number) {
+    const ok = await askConfirm({
+      title: 'Excluir movimentação?',
+      description:
+        'A movimentação e seus rateios ficam guardados no histórico (soft delete) mas somem das listas e relatórios.',
+      destructive: true,
+      confirmLabel: 'Excluir',
+    });
+    if (!ok) return;
     deleteMut.mutate({ id });
   }
 
   return (
     <div className="space-y-4">
+      {confirmNode}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Extrato</h1>
           <p className="text-slate-500">Consulta de movimentações</p>
+        </div>
+        <div className="flex gap-2">
+          <Link href="/nova-entrada">
+            <Button variant="outline" size="sm">
+              <Plus size={14} /> Entrada
+            </Button>
+          </Link>
+          <Link href="/nova-saida">
+            <Button size="sm">
+              <Plus size={14} /> Saída
+            </Button>
+          </Link>
         </div>
       </div>
 
@@ -192,7 +214,12 @@ export function ExtratoPage() {
               </TableHeader>
               <TableBody>
                 {itemsComSaldo.length === 0 ? (
-                  <TableEmpty colSpan={7} />
+                  <TableEmpty colSpan={7}>
+                    Nenhuma movimentação ainda.{' '}
+                    <Link href="/nova-saida" className="text-slate-900 underline">
+                      Registrar a primeira →
+                    </Link>
+                  </TableEmpty>
                 ) : (
                   itemsComSaldo.map((m) => (
                     <TableRow key={m.id}>
